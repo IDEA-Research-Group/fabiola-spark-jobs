@@ -4,19 +4,27 @@ import com.mongodb.DBObject
 import com.mongodb.util.JSON
 import com.mongodb.spark.MongoSpark
 import es.us.idea.cop.{COPElectricidad, ClassCompiler, ModelBuilder, ModelDefinition}
-import es.us.idea.utils.Utils
-import org.apache.spark.sql.SparkSession
+import es.us.idea.utils.{MongoDB, SparkRowUtils, Utils}
+import org.apache.spark.sql.{Dataset, SparkSession}
 import org.bson.BasicBSONObject
 
 import collection.JavaConversions._
+import scala.util.Try
 
 object Main {
   def main(args: Array[String]) = {
+
+    val instanceId = args.head
+    //val instanceId = "200"
+    //val partitions = args(1).toInt
+    val datasetUri = args(1)
+    //val datasetUri = "/home/alvaro/datasets/hidrocantabrico_split.json"
+
     val spark = SparkSession
       .builder()
-      .appName("FabiolaJob")
+      .appName("FabiolaJob_"+instanceId)
       //.master("local[*]")
-      .master("spark://debian:7077")
+      //.master("spark://debian:7077")
       //.config("spark.mongodb.input.uri","mongodb://10.141.10.111:27017/fabiola.results")
       //.config("spark.mongodb.input.readPreference.name","secondaryPreferred")
       //.config("spark.mongodb.output.uri","mongodb://localhost:27017/test.results")
@@ -95,23 +103,25 @@ object Main {
       """.stripMargin
     )
 
-    val instanceId = args.head
-//    val instanceId = "0"
-    val partitions = args(1).toInt
-
     val modelBuilder = new ModelBuilder("ElectricityCOP", copDefinition)
     val classStr = modelBuilder.buildClass
     //ClassCompiler.loadClass(classStr)
 
-    val rdd =
-      //spark.sparkContext.textFile("/home/alvaro/datasets/hidrocantabrico_split.json",8)
-      spark.sparkContext.textFile("hdfs://10.141.10.111:9000/user/snape/cbd/hidrocantabrico.json", partitions)
-        .map(x => Utils.jsonToMap(x))
-        .map(x => x++COPElectricidad.executeCop(x)++Map("instanceId" -> instanceId))
-        .map(x => x++calculateOptimization(x, "totalFacturaActual"))
-        .map(x => Utils.mapToJson(x))
-        .map(x => JSON.parse(x).asInstanceOf[DBObject])
-    MongoSpark.save(rdd)
+    def columnExists(dataset: Dataset[_], column:String) = Try(dataset(column)).isSuccess
+
+    var dataset =
+      spark.read.json(datasetUri)
+
+        if(columnExists(dataset, "_corrupt_record"))
+          dataset = dataset.filter("_corrupt_record is null").drop("_corrupt_record")
+
+    val rdd = dataset
+      .rdd
+      .map(x => SparkRowUtils.fromRowToMap(x))
+      .map(x => x++COPElectricidad.executeCop(x)++Map("instanceId" -> instanceId))
+      .map(x => x++calculateOptimization(x, "totalFacturaActual"))
+
+    MongoDB.saveMapRdd(rdd)
 
     spark.close()
   }

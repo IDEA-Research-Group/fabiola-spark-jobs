@@ -1,18 +1,13 @@
 package es.us.idea.utils
 
+import com.mongodb.DBObject
 import com.mongodb.spark.MongoSpark
+import com.mongodb.util.JSON
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SQLContext}
 
 object MongoDB {
-  def write(dataframe: DataFrame, sqlContext: SQLContext, collection: String) = {
-
-    MongoSpark.save(
-      dataframe.write.option("collection", collection).mode("append")
-    )
-    /*
-        MongoSpark.save(
-          dataframe,
-          WriteConfig(Map("spark.mongodb.output.uri" -> "mongodb://10.141.10.111:27017/fabiola.results")
-            ))*/
+  def saveMapRdd(rdd: RDD[Map[String, Any]]) = {
+    MongoSpark.save(rdd.map(m => JSON.parse(Utils.mapToJson(m)).asInstanceOf[DBObject]))
   }
 }

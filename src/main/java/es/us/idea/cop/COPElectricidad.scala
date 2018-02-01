@@ -8,7 +8,7 @@ import org.chocosolver.solver.variables.IntVar
 object COPElectricidad {
   def executeCop(in: Map[String, Any]):Map[String, Any] = {
 
-    val consumoActual = in.get("consumo").get.asInstanceOf[List[Map[String, Any]]]
+    val consumoActual = in.get("consumo").get.asInstanceOf[Seq[Map[String, Any]]]
     val model = new Model("ElectricityCOP")
 
     /** ***********************************************************
@@ -60,7 +60,7 @@ object COPElectricidad {
           case 2 => precioTarifa.get("p3").get.toInt
         }
 
-        val dias = consumoActual(i).get("diasFacturacion").get.asInstanceOf[BigInt].toInt
+        val dias = consumoActual(i).get("diasFacturacion").get.asInstanceOf[Long].toInt
 
         model.ifThen(
           model.arithm(model.intScaleView(potenciaContratada(j), 85), ">", pm * 100),
