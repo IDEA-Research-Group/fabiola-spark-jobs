@@ -14,21 +14,21 @@ import scala.util.Try
 object Main {
   def main(args: Array[String]) = {
 
-    //val instanceId = args.head
-    val instanceId = "200"
+    val instanceId = args.head
+    //val instanceId = "200"
     //val partitions = args(1).toInt
-    //val datasetUri = args(2)
-    val datasetUri = "/home/alvaro/datasets/hidrocantabrico_split.json"
+    val datasetUri = args(1)
+    //val datasetUri = "/home/alvaro/datasets/hidrocantabrico_split.json"
 
     val spark = SparkSession
       .builder()
-      .appName("FabiolaJob")
-      .master("local[*]")
+      .appName("FabiolaJob_"+instanceId)
+      //.master("local[*]")
       //.master("spark://debian:7077")
       //.config("spark.mongodb.input.uri","mongodb://10.141.10.111:27017/fabiola.results")
       //.config("spark.mongodb.input.readPreference.name","secondaryPreferred")
-      .config("spark.mongodb.output.uri","mongodb://localhost:27017/test.results")
-      //.config("spark.mongodb.output.uri","mongodb://10.141.10.111:27017/fabiola.results")
+      //.config("spark.mongodb.output.uri","mongodb://localhost:27017/test.results")
+      .config("spark.mongodb.output.uri","mongodb://10.141.10.111:27017/fabiola.results")
       .config("spark.blockManager.port", 38000)
       .config("spark.broadcast.port", 38001)
       .config("spark.driver.port", 38002)
