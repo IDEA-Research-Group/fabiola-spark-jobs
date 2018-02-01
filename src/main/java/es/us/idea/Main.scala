@@ -14,13 +14,13 @@ object Main {
   def main(args: Array[String]) = {
     val spark = SparkSession
       .builder()
-      //.appName("FabiolaJob")
-      .master("local[*]")
-      //.master("spark://debian:7077")
+      .appName("FabiolaJob")
+      //.master("local[*]")
+      .master("spark://debian:7077")
       //.config("spark.mongodb.input.uri","mongodb://10.141.10.111:27017/fabiola.results")
       //.config("spark.mongodb.input.readPreference.name","secondaryPreferred")
-      .config("spark.mongodb.output.uri","mongodb://localhost:27017/test.results")
-      //.config("spark.mongodb.output.uri","mongodb://10.141.10.111:27017/fabiola.results")
+      //.config("spark.mongodb.output.uri","mongodb://localhost:27017/test.results")
+      .config("spark.mongodb.output.uri","mongodb://10.141.10.111:27017/fabiola.results")
       .config("spark.blockManager.port", 38000)
       .config("spark.broadcast.port", 38001)
       .config("spark.driver.port", 38002)
@@ -95,16 +95,17 @@ object Main {
       """.stripMargin
     )
 
-//    val instanceId = args.head
-    val instanceId = "0"
+    val instanceId = args.head
+//    val instanceId = "0"
+    val partitions = args(1).toInt
 
     val modelBuilder = new ModelBuilder("ElectricityCOP", copDefinition)
     val classStr = modelBuilder.buildClass
     //ClassCompiler.loadClass(classStr)
 
     val rdd =
-      spark.sparkContext.textFile("/home/alvaro/datasets/hidrocantabrico_split.json")
-      //spark.sparkContext.textFile("hdfs://10.141.10.111:9000/user/snape/cbd/hidrocantabrico.json")
+      //spark.sparkContext.textFile("/home/alvaro/datasets/hidrocantabrico_split.json",8)
+      spark.sparkContext.textFile("hdfs://10.141.10.111:9000/user/snape/cbd/hidrocantabrico.json", partitions)
         .map(x => Utils.jsonToMap(x))
         .map(x => x++COPElectricidad.executeCop(x)++Map("instanceId" -> instanceId))
         .map(x => x++calculateOptimization(x, "totalFacturaActual"))
