@@ -24,7 +24,7 @@ object Main {
       .builder()
       .appName("FabiolaJob_"+instanceId)
       //.master("local[*]")
-      //.master("spark://debian:7077")
+      .master("spark://debian:7077")
       //.config("spark.mongodb.input.uri","mongodb://10.141.10.111:27017/fabiola.results")
       //.config("spark.mongodb.input.readPreference.name","secondaryPreferred")
       //.config("spark.mongodb.output.uri","mongodb://localhost:27017/test.results")
