@@ -1,21 +1,20 @@
 package es.us.idea.cop
 
-import es.us.idea.utils.Utils
 import org.chocosolver.solver._
-import org.chocosolver.solver.search.limits.{SolutionCounter, TimeCounter}
+import org.chocosolver.solver.search.limits.TimeCounter
 import org.chocosolver.solver.variables.IntVar
 
-object COPElectricidad {
+object COPElectricidadConquense {
   def executeCop(in: Map[String, Any]):Map[String, Any] = {
     println(in)
-    val consumoActual = in.get("consumo").get.asInstanceOf[Seq[Map[String, Any]]]
+    val consumoActual = in.get("consumos").get.asInstanceOf[Seq[Map[String, Any]]]
     val model = new Model("ElectricityCOP")
 
     /** ***********************************************************
       * Datos del problema
       * ***********************************************************/
     val scale = 10
-    val precioTarifa = in.get("precioTarifa").get.asInstanceOf[Map[String, Double]]
+    val precioTarifa = in.get("precio_potencia").get.asInstanceOf[Map[String, Double]]
 
     /** ***********************************************************
       * Variables
@@ -41,16 +40,16 @@ object COPElectricidad {
         // pm is scaled 10 times
         val pm = scale * ( j match {
           case 0 => math.max(
-            consumoActual(i).get("potencias").get.asInstanceOf[Map[String, Any]].get("p1").get.asInstanceOf[Double].toInt,
-            consumoActual(i).get("potencias").get.asInstanceOf[Map[String, Any]].get("p4").get.asInstanceOf[Double].toInt
+            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Long].toInt,
+            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Long].toInt
           )
           case 1 => math.max(
-            consumoActual(i).get("potencias").get.asInstanceOf[Map[String, Any]].get("p2").get.asInstanceOf[Double].toInt,
-            consumoActual(i).get("potencias").get.asInstanceOf[Map[String, Any]].get("p5").get.asInstanceOf[Double].toInt
+            consumoActual(i).get("potencia_maxima_p2").get.asInstanceOf[Long].toInt,
+            consumoActual(i).get("potencia_maxima_p5").get.asInstanceOf[Long].toInt
           )
           case 2 => math.max(
-            consumoActual(i).get("potencias").get.asInstanceOf[Map[String, Any]].get("p3").get.asInstanceOf[Double].toInt,
-            consumoActual(i).get("potencias").get.asInstanceOf[Map[String, Any]].get("p6").get.asInstanceOf[Double].toInt
+            consumoActual(i).get("potencia_maxima_p3").get.asInstanceOf[Long].toInt,
+            consumoActual(i).get("potencia_maxima_p6").get.asInstanceOf[Long].toInt
           )
         })
 
@@ -60,7 +59,7 @@ object COPElectricidad {
           case 2 => precioTarifa.get("p3").get.toInt
         }
 
-        val dias = consumoActual(i).get("diasFacturacion").get.asInstanceOf[Long].toInt
+        val dias = consumoActual(i).get("dias_facturacion").get.asInstanceOf[Long].toInt
 
         model.ifThen(
           model.arithm(model.intScaleView(potenciaContratada(j), 85), ">", pm * 100),
