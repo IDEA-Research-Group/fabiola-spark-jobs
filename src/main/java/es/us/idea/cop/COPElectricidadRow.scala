@@ -1,13 +1,16 @@
 package es.us.idea.cop
 
-import es.us.idea.utils.Utils
-import org.chocosolver.solver._
-import org.chocosolver.solver.search.limits.{SolutionCounter, TimeCounter}
+import es.us.idea.utils.SparkRowUtils
+import org.apache.spark.sql.Row
+import org.chocosolver.solver.Model
+import org.chocosolver.solver.search.limits.TimeCounter
 import org.chocosolver.solver.variables.IntVar
 
-object COPElectricidad {
-  def executeCop(in: Map[String, Any]):Map[String, Any] = {
+object COPElectricidadRow {
+  def executeCop(row: Row):Array[Double] = {
     //println(in)
+    val in = SparkRowUtils.fromRowToMap(row)
+
     val consumoActual = in.get("consumo").get.asInstanceOf[Seq[Map[String, Any]]]
     val model = new Model("ElectricityCOP")
 
@@ -60,7 +63,7 @@ object COPElectricidad {
           case 2 => precioTarifa.get("p3").get.toInt
         }
 
-        val dias = consumoActual(i).get("diasFacturacion").get.asInstanceOf[BigInt].toInt
+        val dias = consumoActual(i).get("diasFacturacion").get.asInstanceOf[Long].toInt
 
         model.ifThen(
           model.arithm(model.intScaleView(potenciaContratada(j), 85), ">", pm * 100),
@@ -97,9 +100,11 @@ object COPElectricidad {
     val statistics = Map("time"->solver.getTimeCount, "buildingTime" -> solver.getReadingTimeCount, "totalTime" -> (solver.getTimeCount + solver.getReadingTimeCount), "variableCount" -> model.getNbVars,  "constraintCount" -> model.getNbCstrs)
 
     if(solution != null)
-      Map("optimal" -> solution.getIntVal(TPTotal) / (100.0 * scale), "p1" -> solution.getIntVal(potenciaContratada(0)) / scale.toDouble, "p2" -> solution.getIntVal(potenciaContratada(1)) / scale.toDouble, "p3" -> solution.getIntVal(potenciaContratada(2)) / scale.toDouble) ++ statistics
+      Array(solution.getIntVal(TPTotal) / (100.0 * scale))
+    //Map("optimal" -> solution.getIntVal(TPTotal) / (100.0 * scale), "p1" -> solution.getIntVal(potenciaContratada(0)) / scale.toDouble, "p2" -> solution.getIntVal(potenciaContratada(1)) / scale.toDouble, "p3" -> solution.getIntVal(potenciaContratada(2)) / scale.toDouble) ++ statistics
     else
-      Map("error" -> true, "errorCause"-> "Solution not found") ++ statistics
+      Array(-1.0)
+      //Map("error" -> true, "errorCause"-> "Solution not found") ++ statistics
 
   }
 }

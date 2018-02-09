@@ -3,7 +3,7 @@ package es.us.idea
 import com.mongodb.DBObject
 import com.mongodb.util.JSON
 import com.mongodb.spark.MongoSpark
-import es.us.idea.cop.{COPElectricidad, ClassCompiler, ModelBuilder, ModelDefinition}
+import es.us.idea.cop._
 import es.us.idea.utils.{MongoDB, SparkRowUtils, Utils}
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.bson.BasicBSONObject
@@ -14,21 +14,25 @@ import scala.util.Try
 object Main {
   def main(args: Array[String]) = {
 
-    //val instanceId = args.head
-    val instanceId = "202"
-    //val partitions = args(1).toInt
-    //val datasetUri = args(1)
-    val datasetUri = "/home/alvaro/datasets/hidrocantabrico_split.json"
+    val instanceId = args.head
+    //val instanceId = "202"
+    val datasetUri = args(1)
+    //val datasetUri = "/home/alvaro/datasets/ENDESA/formateado/endesa_datos_agregados_split.json"
+    val mongoOutputUri = args(2)
+    //val mongoOutputUri = "mongodb://localhost:27017/test.results"
+
+    val model = args(3)
+    //val model = "endesa"
 
     val spark = SparkSession
       .builder()
       .appName("FabiolaJob_"+instanceId)
-      .master("local[*]")
-      //.master("spark://debian:7077")
+      //.master("local[*]")
+      .master("spark://debian:7077")
       //.config("spark.mongodb.input.uri","mongodb://10.141.10.111:27017/fabiola.results")
       //.config("spark.mongodb.input.readPreference.name","secondaryPreferred")
-      .config("spark.mongodb.output.uri","mongodb://localhost:27017/test.results")
-      //.config("spark.mongodb.output.uri","mongodb://10.141.10.111:27017/fabiola.results")
+      //.config("spark.mongodb.output.uri","mongodb://localhost:27017/test.results")
+      .config("spark.mongodb.output.uri", mongoOutputUri)
       .config("spark.blockManager.port", 38000)
       .config("spark.broadcast.port", 38001)
       .config("spark.driver.port", 38002)
@@ -107,6 +111,32 @@ object Main {
     val classStr = modelBuilder.buildClass
     //ClassCompiler.loadClass(classStr)
 
+    model match {
+      case "hidrocantabrico" =>
+        val rdd = spark.sparkContext.textFile(datasetUri)
+          .map(x => Utils.jsonToMap(x))
+          .map(x => x++COPElectricidad.executeCop(x)++Map("instanceId" -> instanceId))
+          .map(x => x++calculateOptimization(x, "totalFacturaActual"))
+          .map(m => JSON.parse(Utils.mapToJson(m)).asInstanceOf[DBObject])
+        MongoSpark.save(rdd)
+      case "conquense" =>
+        val rdd = spark.sparkContext.textFile(datasetUri)
+          .map(x => Utils.jsonToMap(x))
+          .map(x => x++COPElectricidadConquense.executeCop(x)++Map("instanceId" -> instanceId))
+          .map(x => x++calculateOptimization(x, "totalFacturaActual"))
+          .map(m => JSON.parse(Utils.mapToJson(m)).asInstanceOf[DBObject])
+        MongoSpark.save(rdd)
+      case "endesa" =>
+        val rdd = spark.sparkContext.textFile(datasetUri)
+          .map(x => Utils.jsonToMap(x))
+          .map(x => x++COPElectricidadEndesa.executeCop(x)++Map("instanceId" -> instanceId))
+          //.map(x => x++calculateOptimization(x, "totalFacturaActual"))
+          .map(m => JSON.parse(Utils.mapToJson(m)).asInstanceOf[DBObject])
+        MongoSpark.save(rdd)
+    }
+
+
+    /*
     def columnExists(dataset: Dataset[_], column:String) = Try(dataset(column)).isSuccess
 
     var dataset =
@@ -121,8 +151,8 @@ object Main {
       .map(x => x++COPElectricidad.executeCop(x)++Map("instanceId" -> instanceId))
       .map(x => x++calculateOptimization(x, "totalFacturaActual"))
       .map(m => JSON.parse(Utils.mapToJson(m)).asInstanceOf[DBObject])
+*/
 
-    MongoSpark.save(rdd)
 
     spark.close()
   }
