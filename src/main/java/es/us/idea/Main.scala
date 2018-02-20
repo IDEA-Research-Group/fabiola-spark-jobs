@@ -5,11 +5,12 @@ import com.mongodb.util.JSON
 import com.mongodb.spark.MongoSpark
 import es.us.idea.cop._
 import es.us.idea.utils.{MongoDB, SparkRowUtils, Utils}
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.{Dataset, Row, SparkSession}
 import org.bson.BasicBSONObject
 
 import collection.JavaConversions._
 import scala.util.Try
+import org.apache.spark.sql.functions._
 
 object Main {
   def main(args: Array[String]) = {
@@ -28,20 +29,22 @@ object Main {
       .builder()
       .appName("FabiolaJob_"+instanceId)
       //.master("local[*]")
-      .master("spark://debian:7077")
+      //.master("mesos://10.141.10.120:5050")
+      //.master("spark://debian:7077")
       //.config("spark.mongodb.input.uri","mongodb://10.141.10.111:27017/fabiola.results")
       //.config("spark.mongodb.input.readPreference.name","secondaryPreferred")
       //.config("spark.mongodb.output.uri","mongodb://localhost:27017/test.results")
+      //.config("spark.executor.uri", "hdfs://10.141.10.111:9000/user/snape/spark/spark-2.2.1-bin-hadoop2.6.tgz")
       .config("spark.mongodb.output.uri", mongoOutputUri)
-      .config("spark.blockManager.port", 38000)
-      .config("spark.broadcast.port", 38001)
-      .config("spark.driver.port", 38002)
-      .config("spark.executor.port", 38003)
-      .config("spark.fileserver.port", 38004)
-      .config("spark.replClassServer.port", 38005)
-      .config("spark.network.timeout", "240s")
-      .config("spark.executor.heartbeatInterval", "60s")
-      .config("spark.files.fetchTimeout", "240s")
+      //.config("spark.blockManager.port", 38000)
+      //.config("spark.broadcast.port", 38001)
+      //.config("spark.driver.port", 38002)
+      //.config("spark.executor.port", 38003)
+      //.config("spark.fileserver.port", 38004)
+      //.config("spark.replClassServer.port", 38005)
+      //.config("spark.network.timeout", "240s")
+      //.config("spark.executor.heartbeatInterval", "60s")
+      //.config("spark.files.fetchTimeout", "240s")
 
       .getOrCreate()
 
@@ -107,8 +110,8 @@ object Main {
       """.stripMargin
     )
 
-    val modelBuilder = new ModelBuilder("ElectricityCOP", copDefinition)
-    val classStr = modelBuilder.buildClass
+    //val modelBuilder = new ModelBuilder("ElectricityCOP", copDefinition)
+    //val classStr = modelBuilder.buildClass
     //ClassCompiler.loadClass(classStr)
 
     model match {
@@ -136,7 +139,7 @@ object Main {
     }
 
 
-    /*
+/*
     def columnExists(dataset: Dataset[_], column:String) = Try(dataset(column)).isSuccess
 
     var dataset =
@@ -145,6 +148,12 @@ object Main {
         if(columnExists(dataset, "_corrupt_record"))
           dataset = dataset.filter("_corrupt_record is null").drop("_corrupt_record")
 
+    // intentar imitar el ejemplo expuesto en
+    // https://stackoverflow.com/questions/31816975/how-to-pass-whole-row-to-udf-spark-dataframe-filter
+    def copFunct: (Row => Boolean) = {true}
+
+    def copUdf = udf(copFunct)
+
     val rdd = dataset
       .rdd
       .map(x => SparkRowUtils.fromRowToMap(x))
@@ -152,8 +161,6 @@ object Main {
       .map(x => x++calculateOptimization(x, "totalFacturaActual"))
       .map(m => JSON.parse(Utils.mapToJson(m)).asInstanceOf[DBObject])
 */
-
-
     spark.close()
   }
 
