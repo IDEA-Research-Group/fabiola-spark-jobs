@@ -1,13 +1,15 @@
 package es.us.idea.cop
 
-import es.us.idea.utils.SparkRowUtils
+import es.us.idea.utils.{Default, SparkRowUtils}
 import org.apache.spark.sql.Row
 import org.chocosolver.solver.Model
 import org.chocosolver.solver.search.limits.TimeCounter
 import org.chocosolver.solver.variables.IntVar
 
+import scala.util.Try
+
 object COPElectricidadRow {
-  def executeCop(row: Row):Array[Double] = {
+  def executeCop(row: Row) = {
     //println(in)
     val in = SparkRowUtils.fromRowToMap(row)
 
@@ -97,14 +99,28 @@ object COPElectricidadRow {
     val solver = model.getSolver
     val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, 5000000000L))
 
-    val statistics = Map("time"->solver.getTimeCount, "buildingTime" -> solver.getReadingTimeCount, "totalTime" -> (solver.getTimeCount + solver.getReadingTimeCount), "variableCount" -> model.getNbVars,  "constraintCount" -> model.getNbCstrs)
+    val metrics = (solver.getTimeCount.toDouble,solver.getReadingTimeCount.toDouble, (solver.getTimeCount + solver.getReadingTimeCount).toDouble, model.getNbVars, model.getNbCstrs)
 
-    if(solution != null)
-      Array(solution.getIntVal(TPTotal) / (100.0 * scale))
-    //Map("optimal" -> solution.getIntVal(TPTotal) / (100.0 * scale), "p1" -> solution.getIntVal(potenciaContratada(0)) / scale.toDouble, "p2" -> solution.getIntVal(potenciaContratada(1)) / scale.toDouble, "p3" -> solution.getIntVal(potenciaContratada(2)) / scale.toDouble) ++ statistics
-    else
-      Array(-1.0)
-      //Map("error" -> true, "errorCause"-> "Solution not found") ++ statistics
+    if(solution != null){
+      (
+        ( solution.getIntVal(TPTotal) / (100.0 * scale), // optimal
+          solution.getIntVal(potenciaContratada(0)) / scale.toDouble, // p1
+          solution.getIntVal(potenciaContratada(1)) / scale.toDouble, //p2
+          solution.getIntVal(potenciaContratada(2)) / scale.toDouble //p3
+        ),
+        metrics
+      )
+    } else {
+      (
+        (
+          Default.DefaultDouble.default, // optimal
+          Default.DefaultDouble.default, // p1
+          Default.DefaultDouble.default, //p2
+          Default.DefaultDouble.default //p3
+        ),
+        metrics
+      )
+    }
 
   }
 }
