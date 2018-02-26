@@ -10,16 +10,15 @@ import scala.util.Try
 
 object COPElectricidadRow {
   def executeCop(row: Row) = {
-    //println(in)
     val in = SparkRowUtils.fromRowToMap(row)
-
-    val consumoActual = in.get("consumo").get.asInstanceOf[Seq[Map[String, Any]]]
+    //val consumoActual = in.get("consumo").get.asInstanceOf[Seq[Map[String, Any]]]
     val model = new Model("ElectricityCOP")
 
     /** ***********************************************************
       * Datos del problema
       * ***********************************************************/
     val scale = 10
+    val consumoActual = in.get("consumo").get.asInstanceOf[Seq[Map[String, Any]]]
     val precioTarifa = in.get("precioTarifa").get.asInstanceOf[Map[String, Double]]
 
     /** ***********************************************************
@@ -99,11 +98,13 @@ object COPElectricidadRow {
     val solver = model.getSolver
     val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, 5000000000L))
 
-    val metrics = (solver.getTimeCount.toDouble,solver.getReadingTimeCount.toDouble, (solver.getTimeCount + solver.getReadingTimeCount).toDouble, model.getNbVars, model.getNbCstrs)
+    val metrics = (solver.getTimeCount.toDouble,solver.getReadingTimeCount.toDouble, (solver.getTimeCount + solver.getReadingTimeCount).toDouble, model.getNbVars.toDouble, model.getNbCstrs.toDouble)
+    //println("Tiempo cop: "+ (System.currentTimeMillis()-anteriorCop)/1000.0 + " - cups: "+ cups)
 
     if(solution != null){
       (
-        ( solution.getIntVal(TPTotal) / (100.0 * scale), // optimal
+        Seq(
+          solution.getIntVal(TPTotal) / (100.0 * scale), // optimal
           solution.getIntVal(potenciaContratada(0)) / scale.toDouble, // p1
           solution.getIntVal(potenciaContratada(1)) / scale.toDouble, //p2
           solution.getIntVal(potenciaContratada(2)) / scale.toDouble //p3
@@ -112,7 +113,7 @@ object COPElectricidadRow {
       )
     } else {
       (
-        (
+        Seq(
           Default.DefaultDouble.default, // optimal
           Default.DefaultDouble.default, // p1
           Default.DefaultDouble.default, //p2

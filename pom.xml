@@ -6,7 +6,7 @@
 
     <groupId>es.us.idea</groupId>
     <artifactId>fabiola</artifactId>
-    <version>3.2.2-SNAPSHOT</version>
+    <version>3.3.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -45,11 +45,11 @@
             <artifactId>mongo-spark-connector_2.11</artifactId>
             <version>2.1.0</version>
         </dependency>
-
+        <!-- https://mvnrepository.com/artifact/org.mongodb.scala/mongo-scala-driver -->
         <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>3.4.2</version>
+            <groupId>org.mongodb.scala</groupId>
+            <artifactId>mongo-scala-driver_2.11</artifactId>
+            <version>2.1.0</version>
         </dependency>
 
         <!-- Choco solver modified dependency -->

@@ -7,7 +7,7 @@ import es.us.idea.cop._
 import es.us.idea.utils.{MongoDB, SparkRowUtils, Utils}
 import org.apache.spark.sql.{Dataset, Row, SparkSession}
 import org.bson.BasicBSONObject
-
+import es.us.idea.dao._
 import collection.JavaConversions._
 import scala.util.Try
 import org.apache.spark.sql.functions._
@@ -49,7 +49,7 @@ object Main {
       .getOrCreate()
 
     import spark.implicits._
-
+/*
     val copDefinition = ModelDefinition(
       """
         |    val consumoActual = in.get("consumo").get.asInstanceOf[List[Map[String, Any]]]
@@ -109,7 +109,7 @@ object Main {
         |    return res
       """.stripMargin
     )
-
+    */
     //val modelBuilder = new ModelBuilder("ElectricityCOP", copDefinition)
     //val classStr = modelBuilder.buildClass
     //ClassCompiler.loadClass(classStr)
