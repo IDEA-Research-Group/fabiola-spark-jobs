@@ -2,6 +2,9 @@ package es.us.idea.cop
 
 import java.lang.reflect.Method
 
+import es.us.idea.utils.SparkRowUtils
+import org.apache.spark.sql.Row
+
 import scala.tools.reflect.ToolBox
 import scala.reflect.runtime.universe
 
@@ -20,7 +23,8 @@ object ClassCompiler {
 
   }
 
-  def callMethod(in: Map[String, Any]): Map[String, Any] = {
-    method.invoke(instance, in).asInstanceOf[Map[String, Any]]
+  def callMethod(row: Row, timeout: Long): ModelOutput = {
+    val in = SparkRowUtils.fromRowToMap(row)
+    method.invoke(instance, (in, timeout)).asInstanceOf[ModelOutput]
   }
 }

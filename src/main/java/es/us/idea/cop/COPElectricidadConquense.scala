@@ -40,16 +40,16 @@ object COPElectricidadConquense {
         // pm is scaled 10 times
         val pm = scale * ( j match {
           case 0 => math.max(
-            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Long].toInt,
-            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Long].toInt
+            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[BigInt].toInt,
+            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[BigInt].toInt
           )
           case 1 => math.max(
-            consumoActual(i).get("potencia_maxima_p2").get.asInstanceOf[Long].toInt,
-            consumoActual(i).get("potencia_maxima_p5").get.asInstanceOf[Long].toInt
+            consumoActual(i).get("potencia_maxima_p2").get.asInstanceOf[BigInt].toInt,
+            consumoActual(i).get("potencia_maxima_p5").get.asInstanceOf[BigInt].toInt
           )
           case 2 => math.max(
-            consumoActual(i).get("potencia_maxima_p3").get.asInstanceOf[Long].toInt,
-            consumoActual(i).get("potencia_maxima_p6").get.asInstanceOf[Long].toInt
+            consumoActual(i).get("potencia_maxima_p3").get.asInstanceOf[BigInt].toInt,
+            consumoActual(i).get("potencia_maxima_p6").get.asInstanceOf[BigInt].toInt
           )
         })
 
@@ -59,7 +59,7 @@ object COPElectricidadConquense {
           case 2 => precioTarifa.get("p3").get.toInt
         }
 
-        val dias = consumoActual(i).get("dias_facturacion").get.asInstanceOf[Long].toInt
+        val dias = consumoActual(i).get("dias_facturacion").get.asInstanceOf[BigInt].toInt
 
         model.ifThen(
           model.arithm(model.intScaleView(potenciaContratada(j), 85), ">", pm * 100),

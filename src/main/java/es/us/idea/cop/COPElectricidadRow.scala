@@ -1,20 +1,24 @@
 package es.us.idea.cop
 
-import es.us.idea.utils.Utils
-import org.chocosolver.solver._
-import org.chocosolver.solver.search.limits.{SolutionCounter, TimeCounter}
+import es.us.idea.utils.{Default, SparkRowUtils}
+import org.apache.spark.sql.Row
+import org.chocosolver.solver.Model
+import org.chocosolver.solver.search.limits.TimeCounter
 import org.chocosolver.solver.variables.IntVar
 
-object COPElectricidad {
-  def executeCop(in: Map[String, Any]):Map[String, Any] = {
-    //println(in)
-    val consumoActual = in.get("consumo").get.asInstanceOf[Seq[Map[String, Any]]]
+import scala.util.Try
+
+object COPElectricidadRow {
+  def executeCop(row: Row) = {
+    val in = SparkRowUtils.fromRowToMap(row)
+    //val consumoActual = in.get("consumo").get.asInstanceOf[Seq[Map[String, Any]]]
     val model = new Model("ElectricityCOP")
 
     /** ***********************************************************
       * Datos del problema
       * ***********************************************************/
     val scale = 10
+    val consumoActual = in.get("consumo").get.asInstanceOf[Seq[Map[String, Any]]]
     val precioTarifa = in.get("precioTarifa").get.asInstanceOf[Map[String, Double]]
 
     /** ***********************************************************
@@ -60,7 +64,7 @@ object COPElectricidad {
           case 2 => precioTarifa.get("p3").get.toInt
         }
 
-        val dias = consumoActual(i).get("diasFacturacion").get.asInstanceOf[BigInt].toInt
+        val dias = consumoActual(i).get("diasFacturacion").get.asInstanceOf[Long].toInt
 
         model.ifThen(
           model.arithm(model.intScaleView(potenciaContratada(j), 85), ">", pm * 100),
@@ -94,12 +98,30 @@ object COPElectricidad {
     val solver = model.getSolver
     val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, 5000000000L))
 
-    val statistics = Map("time"->solver.getTimeCount, "buildingTime" -> solver.getReadingTimeCount, "totalTime" -> (solver.getTimeCount + solver.getReadingTimeCount), "variableCount" -> model.getNbVars,  "constraintCount" -> model.getNbCstrs)
+    val metrics = (solver.getTimeCount.toDouble,solver.getReadingTimeCount.toDouble, (solver.getTimeCount + solver.getReadingTimeCount).toDouble, model.getNbVars.toDouble, model.getNbCstrs.toDouble)
+    //println("Tiempo cop: "+ (System.currentTimeMillis()-anteriorCop)/1000.0 + " - cups: "+ cups)
 
-    if(solution != null)
-      Map("optimal" -> solution.getIntVal(TPTotal) / (100.0 * scale), "p1" -> solution.getIntVal(potenciaContratada(0)) / scale.toDouble, "p2" -> solution.getIntVal(potenciaContratada(1)) / scale.toDouble, "p3" -> solution.getIntVal(potenciaContratada(2)) / scale.toDouble) ++ statistics
-    else
-      Map("error" -> true, "errorCause"-> "Solution not found") ++ statistics
+    if(solution != null){
+      (
+        Seq(
+          solution.getIntVal(TPTotal) / (100.0 * scale), // optimal
+          solution.getIntVal(potenciaContratada(0)) / scale.toDouble, // p1
+          solution.getIntVal(potenciaContratada(1)) / scale.toDouble, //p2
+          solution.getIntVal(potenciaContratada(2)) / scale.toDouble //p3
+        ),
+        metrics
+      )
+    } else {
+      (
+        Seq(
+          Default.DefaultDouble.default, // optimal
+          Default.DefaultDouble.default, // p1
+          Default.DefaultDouble.default, //p2
+          Default.DefaultDouble.default //p3
+        ),
+        metrics
+      )
+    }
 
   }
 }
