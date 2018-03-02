@@ -9,20 +9,22 @@ import scala.tools.reflect.ToolBox
 import scala.reflect.runtime.universe
 
 object ClassCompiler {
-  var instance: Any = _
-  var method: Method = _
+  var clazz: Class[_] = _
 
   def loadClass(classStr: String) {
     val tb = universe.runtimeMirror(getClass.getClassLoader).mkToolBox()
     val clazz = tb.compile(tb.parse(classStr))().asInstanceOf[Class[_]]
-    val ctor = clazz.getDeclaredConstructors()(0)
-    this.instance = ctor.newInstance()
-    this.method = instance.getClass.getMethods.filter(_.getName.eq("executeCop")).head
+    this.clazz = clazz
   }
 
   def callMethod(classStr: String, row: Row, timeout: Long): ModelOutput = {
     val in = SparkRowUtils.fromRowToMap(row)
-    if (method == null) loadClass(classStr)
+    if (clazz == null) loadClass(classStr)
+    val ctor = clazz.getDeclaredConstructors()(0)
+    val instance = ctor.newInstance()
+    val method = instance.getClass.getMethods.filter(_.getName.eq("executeCop")).head
+
+
     method.invoke(instance, (in, timeout)).asInstanceOf[ModelOutput]
   }
 }
