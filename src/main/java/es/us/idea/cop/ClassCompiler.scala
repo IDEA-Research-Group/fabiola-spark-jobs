@@ -13,18 +13,16 @@ object ClassCompiler {
   var method: Method = _
 
   def loadClass(classStr: String) {
-    //this(classStr, 0)
     val tb = universe.runtimeMirror(getClass.getClassLoader).mkToolBox()
     val clazz = tb.compile(tb.parse(classStr))().asInstanceOf[Class[_]]
     val ctor = clazz.getDeclaredConstructors()(0)
     this.instance = ctor.newInstance()
-    //val method = instance.getClass.getMethods.filter(m => m.eq("optimusCop"))
-    this.method = instance.getClass.getMethods.filter(m => m.getName.eq("executeCop")).head
-
+    this.method = instance.getClass.getMethods.filter(_.getName.eq("executeCop")).head
   }
 
-  def callMethod(row: Row, timeout: Long): ModelOutput = {
+  def callMethod(classStr: String, row: Row, timeout: Long): ModelOutput = {
     val in = SparkRowUtils.fromRowToMap(row)
+    if (method == null) loadClass(classStr)
     method.invoke(instance, (in, timeout)).asInstanceOf[ModelOutput]
   }
 }
