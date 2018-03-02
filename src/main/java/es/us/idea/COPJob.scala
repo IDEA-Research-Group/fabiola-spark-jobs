@@ -29,7 +29,7 @@ object COPJob {
     // Only for development purposes
     //val fabiolaDBUri= "mongodb://localhost:27017"
     //val fabiolaDBName = "test"
-    //val instanceId = "5a9413d2073e827e80be055c"
+    //val instanceId = "5a990fca43a3b63cdbc759ef"
 
     /** Connect to MongoDB and get the Instance and ModelDefinition for this instance
       */
@@ -81,7 +81,6 @@ object COPJob {
       .getOrCreate()
 
     var ds = spark.read.json(instance.datasetUri)
-      .select(in ++ other: _*)
       .withColumn("modelOutput", explode(array(executeCopUdf(struct(in: _*)))))
       .withColumn("instanceId", toObjectId())
       .withColumn("in", struct(in: _*))

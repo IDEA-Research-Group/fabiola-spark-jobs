@@ -14,7 +14,6 @@ object COPElectricidadEndesa {
       * Datos del problema
       * ***********************************************************/
     val scale = 10
-    //val precioTarifa = in.get("precio_potencia").get.asInstanceOf[Map[String, Double]]
     val precioTarifa = Map("p1" -> 11, "p2" -> 7, "p3" -> 4)
 
     /** ***********************************************************
