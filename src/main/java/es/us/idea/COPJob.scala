@@ -22,14 +22,14 @@ object COPJob {
     * - The instanceId of this problem instance
     */
   def main(args: Array[String]) = {
-    val fabiolaDBUri = args(0)
-    val fabiolaDBName = args(1)
-    val instanceId = args(2)
+    //val fabiolaDBUri = args(0)
+    //val fabiolaDBName = args(1)
+    //val instanceId = args(2)
 
     // Only for development purposes
-    //val fabiolaDBUri= "mongodb://localhost:27017"
-    //val fabiolaDBName = "test"
-    //val instanceId = "5a990fca43a3b63cdbc759ef"
+    val fabiolaDBUri= "mongodb://estigia.lsi.us.es:12527"
+    val fabiolaDBName = "fabiola"
+    val instanceId = "5acdc97aa53b5093dd09ecc0"
 
     /** Connect to MongoDB and get the Instance and ModelDefinition for this instance
       */
@@ -74,7 +74,7 @@ object COPJob {
       */
     val spark = SparkSession
       .builder()
-      //.master("local[*]")
+      .master("local[*]")
       .appName(s"Fabiola-COPJob_${instanceId}")
       //.config("spark.mongodb.input.readPreference.name","secondaryPreferred")
       .config("spark.mongodb.output.uri", s"${Utils.removeLastSlashes(fabiolaDBUri)}/$fabiolaDBName.results")
