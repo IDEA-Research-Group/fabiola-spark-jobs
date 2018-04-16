@@ -98,7 +98,7 @@ class FabiolaDatabase(databaseUri: String, databaseName: String) {
     Await.result(instancesFuture, 30 seconds)
   }
 
-  def updateInstanceStatus(instanceId: String, appId: String): Instance = {
+  def updateInstanceAppId(instanceId: String, appId: String): Instance = {
     val instances: MongoCollection[Instance] = database.withCodecRegistry(instanceCodecRegistry).getCollection("instances")
 
     val instancesFuture = instances.findOneAndUpdate(equal("_id", BsonObjectId(instanceId)), set("appId", appId)).toFuture

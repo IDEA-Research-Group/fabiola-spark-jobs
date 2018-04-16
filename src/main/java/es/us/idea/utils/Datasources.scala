@@ -5,6 +5,7 @@ import java.io.{EOFException, IOException}
 import com.mongodb.spark.MongoSpark
 import com.mongodb.spark.config.ReadConfig
 import es.us.idea.exceptions._
+import es.us.idea.exceptions.datasource._
 import org.apache.spark.sql.{AnalysisException, Dataset, SparkSession}
 import org.mongodb.scala.MongoException
 
@@ -16,8 +17,8 @@ class Datasources(spark: SparkSession, dataset: es.us.idea.dao.Dataset) {
     try {
       val readConfig = ReadConfig(
         Map(
-          //"uri" -> s"mongodb://${auth}${dataset.hostname}:${dataset.port}/${dataset.path}",
-          "uri" -> s"mongodb://fadsfdas:${dataset.port}/${dataset.path}",
+          "uri" -> s"mongodb://${auth}${dataset.hostname}:${dataset.port}/${dataset.path}",
+          //"uri" -> s"mongodb://${dataset.port}/${dataset.path}",
           "collection" -> collection,
           "readPreference.name" -> "secondaryPreferred"
         )
@@ -35,8 +36,8 @@ class Datasources(spark: SparkSession, dataset: es.us.idea.dao.Dataset) {
     if (!List("json", "csv").contains(format)) throw new UnsupportedFormatException("Format not supported")
     try {
       if (format equals "json")
-        //spark.read.json(s"hdfs://${dataset.hostname}:${dataset.port}/${dataset.path}")
-        spark.read.json(s"${dataset.path}/fdsdfs")
+        spark.read.json(s"hdfs://${dataset.hostname}:${dataset.port}/${dataset.path}")
+        //spark.read.json(s"${dataset.path}/fdsdfs")
       else
         spark.read.csv(s"hdfs://${dataset.hostname}:${dataset.port}/${dataset.path}")
     } catch {

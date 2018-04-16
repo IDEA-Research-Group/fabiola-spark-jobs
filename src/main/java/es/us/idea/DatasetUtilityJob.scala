@@ -2,6 +2,7 @@ package es.us.idea
 
 import es.us.idea.utils.{Datasources, FabiolaDatabase, Statuses}
 import es.us.idea.exceptions._
+import es.us.idea.exceptions.datasource._
 import es.us.idea.listeners.SparkListenerShared
 import org.apache.spark.sql.SparkSession
 
@@ -14,9 +15,9 @@ object DatasetUtilityJob {
     // Only for development purposes
     val fabiolaDBUri = "mongodb://estigia.lsi.us.es:12527"
     val fabiolaDBName = "fabiola"
-    //val datasetId = "5acdce19a53b5093dd09ecc1" // mongodb
+    val datasetId = "5acdce19a53b5093dd09ecc1" // mongodb
     //val datasetId = "5acf1b32a53b5093dd09ee63"   // hdfs json (does not work)
-    val datasetId = "5acf2976a53b5093dd09ee64" // local json
+    //val datasetId = "5acf2976a53b5093dd09ee64" // local json
 
     val fabiolaDatabase = new FabiolaDatabase(fabiolaDBUri, fabiolaDBName)
     val dataset = fabiolaDatabase.getDataset(datasetId)

@@ -9,14 +9,17 @@ class FabiolaSparkListener extends SparkListener {
     super.onApplicationStart(ev)
 
     var datasetId = SparkListenerShared.datasetId
+    var instanceId = SparkListenerShared.instanceId
     var fabiolaDatabase = SparkListenerShared.fabiolaDatabase
     var appId = ev.appId
 
-    if (datasetId.isDefined) {
-      fabiolaDatabase.get.updateDatasetStatus(SparkListenerShared.datasetId.get, Statuses.RUNNING)
+    if (instanceId.isDefined) {
+      fabiolaDatabase.get.updateInstanceStatus(instanceId.get, Statuses.RUNNING)
+      if (appId.isDefined) fabiolaDatabase.get.updateInstanceAppId(instanceId.get, appId.get)
+    } else if (datasetId.isDefined) {
+      fabiolaDatabase.get.updateDatasetStatus(datasetId.get, Statuses.RUNNING)
     }
 
-    println("AAA: Application Start")
     println(ev.appId)
   }
 
@@ -24,15 +27,20 @@ class FabiolaSparkListener extends SparkListener {
     super.onApplicationEnd(ev)
 
     var datasetId = SparkListenerShared.datasetId
+    var instanceId = SparkListenerShared.instanceId
     var fabiolaDatabase = SparkListenerShared.fabiolaDatabase
 
-    if (datasetId.isDefined) {
-
+    if(instanceId.isDefined) {
+      if (SparkListenerShared.hasSuccessfullyFinished)
+        fabiolaDatabase.get.updateInstanceStatus(instanceId.get, Statuses.FINISHED)
+      else {
+        fabiolaDatabase.get.updateInstanceStatus(instanceId.get, Statuses.ERROR, SparkListenerShared.errorMsg)
+      }
+    } else if (datasetId.isDefined) {
       if (SparkListenerShared.hasSuccessfullyFinished)
         fabiolaDatabase.get.updateDatasetStatus(datasetId.get, Statuses.FINISHED)
       else {
         fabiolaDatabase.get.updateDatasetStatus(datasetId.get, Statuses.ERROR, SparkListenerShared.errorMsg)
-        //fabiolaDatabase.get.updateDatasetErrorMsg(datasetId.get, SparkListenerShared.errorMsg)
       }
     }
 
