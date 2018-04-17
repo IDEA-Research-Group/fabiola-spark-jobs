@@ -9,7 +9,6 @@ import es.us.idea.cop._
 import es.us.idea.cop.definitions.ModelDefinitions
 import es.us.idea.exceptions._
 import es.us.idea.exceptions.datasource._
-import es.us.idea.exceptions.modelDefinition.TypeConflictException
 import es.us.idea.listeners.SparkListenerShared
 import es.us.idea.utils.{Datasources, FabiolaDatabase, Utils}
 import org.apache.commons.lang3.exception.ExceptionUtils
@@ -38,8 +37,8 @@ object COPJob {
     //val instanceId = args(2)
 
     // Only for development purposes
-    //val fabiolaDBUri= "mongodb://estigia.lsi.us.es:12527"
-    val fabiolaDBUri= "mongodb://10.141.10.125:27017"
+    val fabiolaDBUri= "mongodb://estigia.lsi.us.es:12527"
+    //val fabiolaDBUri= "mongodb://10.141.10.125:27017"
     val fabiolaDBName = "fabiola"
     val instanceId = "5ad47fc955714bd8acf76256"
 
@@ -77,7 +76,7 @@ object COPJob {
       */
     val spark = SparkSession
       .builder()
-      //.master("local[*]")
+      .master("local[*]")
       .appName(s"Fabiola-COPJob_${instanceId}")
       .config("spark.extraListeners", "es.us.idea.listeners.FabiolaSparkListener")
       .config("spark.mongodb.output.uri", s"${Utils.removeLastSlashes(fabiolaDBUri)}/$fabiolaDBName.results")
