@@ -117,7 +117,6 @@ object COPJob {
 
       ds = ds.select(selectCols: _*)
 
-      ds.printSchema
       MongoSpark.save(ds)
 
       SparkListenerShared.setHasSuccessfullyFinished
