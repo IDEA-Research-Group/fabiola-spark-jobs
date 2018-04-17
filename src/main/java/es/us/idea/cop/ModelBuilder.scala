@@ -18,11 +18,12 @@ class ModelBuilder(modelDefinition: ModelDefinition
       "val in = params._1 \n" +
       "val timeout = params._2 \n" +
       "val model = new Model(\"" + modelDefinition.name + "\") \n" +
-      modelDefinition.domainData + "\n" +
-      modelDefinition.variables + "\n" +
-      modelDefinition.constraints + "\n" +
-      modelDefinition.objective + "\n" +
-      modelDefinition.solution + "\n" +
+      modelDefinition.definition + "\n" +
+      // modelDefinition.domainData + "\n" +
+      // modelDefinition.variables + "\n" +
+      // modelDefinition.constraints + "\n" +
+      // modelDefinition.objective + "\n" +
+      // modelDefinition.solution + "\n" +
       "}" + "\n" +
       "}" + "\n" +
       "scala.reflect.classTag[COPReflect].runtimeClass"

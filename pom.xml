@@ -6,7 +6,7 @@
 
     <groupId>es.us.idea</groupId>
     <artifactId>fabiola</artifactId>
-    <version>0.4.1-BETA</version>
+    <version>0.5.0-BETA</version>
 
     <dependencies>
         <dependency>
@@ -29,13 +29,21 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.11</artifactId>
-            <version>2.1.0</version>
+            <version>2.2.1</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.11</artifactId>
+            <version>2.2.1</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.mongodb.scala/mongo-scala-driver -->
+        <dependency>
+            <groupId>org.mongodb.scala</groupId>
+            <artifactId>mongo-scala-driver_2.11</artifactId>
             <version>2.1.0</version>
             <scope>compile</scope>
         </dependency>
@@ -43,29 +51,21 @@
         <dependency>
             <groupId>org.mongodb.spark</groupId>
             <artifactId>mongo-spark-connector_2.11</artifactId>
-            <version>2.1.0</version>
+            <version>2.2.1</version>
+            <scope>compile</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.mongodb.scala/mongo-scala-driver -->
-        <dependency>
-            <groupId>org.mongodb.scala</groupId>
-            <artifactId>mongo-scala-driver_2.11</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-
         <!-- Choco solver modified dependency -->
         <dependency>
             <groupId>org.choco-solver</groupId>
             <artifactId>choco-solver-mod</artifactId>
             <version>4.0.6</version>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.json4s/json4s-jackson -->
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-jackson_2.12</artifactId>
             <version>3.5.3</version>
         </dependency>
-
     </dependencies>
 
     <repositories>
