@@ -1,7 +1,7 @@
 package es.us.idea.utils
 
 import com.mongodb.client.result.UpdateResult
-import es.us.idea.dao.{Credentials, Dataset, Instance, ModelDefinition}
+import es.us.idea.dao._
 import org.bson.BsonDocument
 import org.mongodb.scala.bson.{BsonDocument, BsonObjectId}
 import org.mongodb.scala.{MongoClient, MongoCollection}
@@ -25,7 +25,7 @@ import scala.concurrent.Await
   */
 class FabiolaDatabase(databaseUri: String, databaseName: String) {
   val database = MongoClient(databaseUri).getDatabase(databaseName)
-  val instanceCodecRegistry = fromRegistries(fromProviders(classOf[Instance]), DEFAULT_CODEC_REGISTRY)
+  val instanceCodecRegistry = fromRegistries(fromProviders(classOf[SystemConfig], classOf[Instance]), DEFAULT_CODEC_REGISTRY)
   val modelDefinitionCodecRegistry = fromRegistries(fromProviders(classOf[ModelDefinition]), DEFAULT_CODEC_REGISTRY)
   val datasetCodecRegistry = fromRegistries(fromProviders(classOf[Credentials], classOf[Dataset]), DEFAULT_CODEC_REGISTRY)
 

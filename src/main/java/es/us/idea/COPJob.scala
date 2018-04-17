@@ -72,15 +72,28 @@ object COPJob {
 
     val timeout = instance.timeout
 
+
     /** Create the SparkSession object
       */
-    val spark = SparkSession
+    var sparkBuilder = SparkSession
       .builder()
       .master("local[*]")
       .appName(s"Fabiola-COPJob_${instanceId}")
       .config("spark.extraListeners", "es.us.idea.listeners.FabiolaSparkListener")
       .config("spark.mongodb.output.uri", s"${Utils.removeLastSlashes(fabiolaDBUri)}/$fabiolaDBName.results")
-      .getOrCreate()
+
+    if(instance.systemConfig.isDefined){
+      if(instance.systemConfig.get.driverCores.isDefined)
+        sparkBuilder = sparkBuilder.config("spark.driver.cores", instance.systemConfig.get.driverCores.get)
+      if(instance.systemConfig.get.driverMemory.isDefined)
+        sparkBuilder = sparkBuilder.config("spark.driver.memory", instance.systemConfig.get.driverMemory.get)
+      if(instance.systemConfig.get.executorCores.isDefined)
+        sparkBuilder = sparkBuilder.config("spark.executor.cores", instance.systemConfig.get.executorCores.get)
+      if(instance.systemConfig.get.executorMemory.isDefined)
+        sparkBuilder = sparkBuilder.config("spark.executor.memory", instance.systemConfig.get.executorMemory.get)
+    }
+
+    val spark = sparkBuilder.getOrCreate()
 
     try {
       /** Generate the model class string
