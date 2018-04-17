@@ -1,8 +1,5 @@
 package es.us.idea.cop
 
-import java.lang.reflect.{InvocationTargetException, Method}
-
-import es.us.idea.exceptions.modelDefinition.TypeConflictException
 import es.us.idea.utils.SparkRowUtils
 import org.apache.spark.sql.Row
 
@@ -25,11 +22,6 @@ object ClassCompiler {
     val instance = ctor.newInstance()
     val method = instance.getClass.getMethods.filter(_.getName.eq("executeCop")).head
 
-    //try {
-      method.invoke(instance, (in, timeout)).asInstanceOf[ModelOutput]
-    //} catch {
-    //  case cce: ClassCastException => throw new TypeConflictException(cce.getMessage)
-    //}
-
+    method.invoke(instance, (in, timeout)).asInstanceOf[ModelOutput]
   }
 }
