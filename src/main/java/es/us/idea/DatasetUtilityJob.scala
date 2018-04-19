@@ -29,7 +29,7 @@ object DatasetUtilityJob {
       */
     val spark = SparkSession
       .builder()
-      .master("local[*]")
+      // .master("local[*]")
       .appName(s"Fabiola-DatasetUtilityJob_${datasetId}")
       .config("spark.extraListeners", "es.us.idea.listeners.FabiolaSparkListener")
       .getOrCreate()

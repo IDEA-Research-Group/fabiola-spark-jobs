@@ -67,9 +67,9 @@ class FabiolaSparkListener extends SparkListener {
 
     } else if (datasetId.isDefined) {
       if (SparkListenerShared.hasSuccessfullyFinished)
-        fabiolaDatabase.get.updateDatasetStatus(datasetId.get, Statuses.FINISHED)
+        fabiolaDatabase.get.updateDatasetStatus(datasetId.get, Statuses.VALIDATED)
       else {
-        fabiolaDatabase.get.updateDatasetStatus(datasetId.get, Statuses.ERROR, SparkListenerShared.errorMsg)
+        fabiolaDatabase.get.updateDatasetStatus(datasetId.get, Statuses.VALIDATION_ERROR, SparkListenerShared.errorMsg)
       }
     }
   }

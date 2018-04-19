@@ -11,7 +11,6 @@ case class Instance
               out: Seq[String],
               ot: Seq[String],
               metrics: Boolean,
-              timeout: Int,
               status: String,
               errorMsg: Option[String],
               appId: Option[String],

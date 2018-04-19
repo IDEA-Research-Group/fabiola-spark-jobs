@@ -67,7 +67,7 @@ object ModelDefinitions {
     |    model.setObjective(Model.MINIMIZE, TPTotal)
     |
     |    val solver = model.getSolver
-    |    val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, timeout*1000000L))
+    |    val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, 5000*1000000L))
     |
     |    val metrics = Seq(solver.getTimeCount.toDouble,solver.getReadingTimeCount.toDouble, (solver.getTimeCount + solver.getReadingTimeCount).toDouble, model.getNbVars.toDouble, model.getNbCstrs.toDouble)
     |
@@ -161,7 +161,7 @@ object ModelDefinitions {
       |    model.setObjective(Model.MINIMIZE, TPTotal)
       |
       |    val solver = model.getSolver
-      |    val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, timeout*1000000L))
+      |    val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, 5000*1000000L))
       |
       |    val metrics = Seq(solver.getTimeCount.toDouble,solver.getReadingTimeCount.toDouble, (solver.getTimeCount + solver.getReadingTimeCount).toDouble, model.getNbVars.toDouble, model.getNbCstrs.toDouble)
       |
@@ -253,7 +253,7 @@ object ModelDefinitions {
       |    model.setObjective(Model.MINIMIZE, TPTotal)
       |
       |    val solver = model.getSolver
-      |    val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, timeout*1000000L))
+      |    val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, 5000*1000000L))
       |
       |    val metrics = Seq(solver.getTimeCount.toDouble,solver.getReadingTimeCount.toDouble, (solver.getTimeCount + solver.getReadingTimeCount).toDouble, model.getNbVars.toDouble, model.getNbCstrs.toDouble)
       |

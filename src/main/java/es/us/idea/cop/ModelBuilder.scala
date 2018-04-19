@@ -14,9 +14,7 @@ class ModelBuilder(modelDefinition: ModelDefinition
     "import org.chocosolver.solver.search.limits.TimeCounter \n" +
     "import org.chocosolver.solver.variables.IntVar \n" +
       "class COPReflect { \n" +
-      "def executeCop(params: (Map[String, Any], Long)): ModelOutput = { \n" +
-      "val in = params._1 \n" +
-      "val timeout = params._2 \n" +
+      "def executeCop(in: Map[String, Any]): ModelOutput = { \n" +
       "val model = new Model(\"" + modelDefinition.name + "\") \n" +
       modelDefinition.definition + "\n" +
       // modelDefinition.domainData + "\n" +

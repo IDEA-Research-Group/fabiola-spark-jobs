@@ -70,9 +70,6 @@ object COPJob {
     if (other.nonEmpty) selectCols = selectCols :+ column("ot")
     if (includeMetrics) selectCols = selectCols :+ column("metrics")
 
-    val timeout = instance.timeout
-
-
     /** Create the SparkSession object
       */
     var sparkBuilder = SparkSession
@@ -105,7 +102,7 @@ object COPJob {
         *
         */
       val executeCopUdf = udf((row: Row) => {
-        ClassCompiler.callMethod(classStr, row, timeout)
+        ClassCompiler.callMethod(classStr, row)
       })
       val toObjectId = udf(() => {
         ObjectId(instanceId)
