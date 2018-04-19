@@ -8,14 +8,14 @@ import org.apache.spark.sql.SparkSession
 
 object DatasetUtilityJob {
   def main(args: Array[String]) = {
-    //val fabiolaDBUri = args(0)
-    //val fabiolaDBName = args(1)
-    //val datasetId = args(2)
+    val fabiolaDBUri = args(0)
+    val fabiolaDBName = args(1)
+    val datasetId = args(2)
 
     // Only for development purposes
-    val fabiolaDBUri = "mongodb://estigia.lsi.us.es:12527"
-    val fabiolaDBName = "fabiola"
-    val datasetId = "5acdce19a53b5093dd09ecc1" // mongodb
+    //val fabiolaDBUri = "mongodb://estigia.lsi.us.es:12527"
+    //val fabiolaDBName = "fabiola"
+    //val datasetId = "5acdce19a53b5093dd09ecc1" // mongodb
     //val datasetId = "5acf1b32a53b5093dd09ee63"   // hdfs json (does not work)
     //val datasetId = "5acf2976a53b5093dd09ee64" // local json
 
@@ -29,7 +29,7 @@ object DatasetUtilityJob {
       */
     val spark = SparkSession
       .builder()
-      .master("local[*]")
+      // .master("local[*]")
       .appName(s"Fabiola-DatasetUtilityJob_${datasetId}")
       .config("spark.extraListeners", "es.us.idea.listeners.FabiolaSparkListener")
       .getOrCreate()

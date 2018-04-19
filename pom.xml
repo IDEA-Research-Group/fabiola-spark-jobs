@@ -6,7 +6,7 @@
 
     <groupId>es.us.idea</groupId>
     <artifactId>fabiola</artifactId>
-    <version>0.5.1-2a-dev</version>
+    <version>0.5.1-BETA</version>
 
     <dependencies>
         <dependency>
