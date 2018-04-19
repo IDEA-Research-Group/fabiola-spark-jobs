@@ -15,13 +15,13 @@ object ClassCompiler {
     this.clazz = clazz
   }
 
-  def callMethod(classStr: String, row: Row, timeout: Long): ModelOutput = {
+  def callMethod(classStr: String, row: Row): ModelOutput = {
     val in = SparkRowUtils.fromRowToMap(row)
     if (clazz == null) loadClass(classStr)
     val ctor = clazz.getDeclaredConstructors()(0)
     val instance = ctor.newInstance()
     val method = instance.getClass.getMethods.filter(_.getName.eq("executeCop")).head
 
-    method.invoke(instance, (in, timeout)).asInstanceOf[ModelOutput]
+    method.invoke(instance, in).asInstanceOf[ModelOutput]
   }
 }
