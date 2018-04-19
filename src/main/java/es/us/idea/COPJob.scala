@@ -74,7 +74,7 @@ object COPJob {
       */
     var sparkBuilder = SparkSession
       .builder()
-      .master("local[*]")
+      // .master("local[*]")
       .appName(s"Fabiola-COPJob_${instanceId}")
       .config("spark.extraListeners", "es.us.idea.listeners.FabiolaSparkListener")
       .config("spark.mongodb.output.uri", s"${Utils.removeLastSlashes(fabiolaDBUri)}/$fabiolaDBName.results")
