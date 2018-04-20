@@ -8,5 +8,5 @@ import org.mongodb.scala.bson.BsonObjectId
   * written in Scala code, using the Choco Solver library methods.
   */
 //case class ModelDefinition(name: String, domainData: String, variables: String, constraints: String, objective: String, solution: String, _id: Option[BsonObjectId] = None)
-case class ModelDefinition(name: String, definition: String /*, _id: Option[BsonObjectId] = None*/)
+case class COPModel(name: String, model: String /*, _id: Option[BsonObjectId] = None*/)
 

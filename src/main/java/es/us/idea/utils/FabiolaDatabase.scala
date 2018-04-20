@@ -26,7 +26,7 @@ import scala.concurrent.Await
 class FabiolaDatabase(databaseUri: String, databaseName: String) {
   val database = MongoClient(databaseUri).getDatabase(databaseName)
   val instanceCodecRegistry = fromRegistries(fromProviders(classOf[SystemConfig], classOf[Instance]), DEFAULT_CODEC_REGISTRY)
-  val modelDefinitionCodecRegistry = fromRegistries(fromProviders(classOf[ModelDefinition]), DEFAULT_CODEC_REGISTRY)
+  val copModelCodecRegistry = fromRegistries(fromProviders(classOf[COPModel]), DEFAULT_CODEC_REGISTRY)
   val datasetCodecRegistry = fromRegistries(fromProviders(classOf[Credentials], classOf[Dataset]), DEFAULT_CODEC_REGISTRY)
 
   /**
@@ -42,15 +42,15 @@ class FabiolaDatabase(databaseUri: String, databaseName: String) {
   }
 
   /**
-    * Gets a model definition given its MongoDB ID
+    * Gets a optimization model given its MongoDB ID
     *
-    * @param modelDefinitionId The MongoDB ID of the model defintiion to find.
-    * @return a model defintion whose _id field is instanceId
+    * @param copModelId The MongoDB ID of the cop model to find.
+    * @return a cop model whose _id field is copModelId
     */
-  def getModelDefinition(modelDefinitionId: String): ModelDefinition = {
-    val modelDefinitions: MongoCollection[ModelDefinition] = database.withCodecRegistry(modelDefinitionCodecRegistry).getCollection("modelDefinitions")
-    val modelDefinitionFuture = modelDefinitions.find(equal("_id", BsonObjectId(modelDefinitionId))).first().toFuture()
-    Await.result(modelDefinitionFuture, 30 seconds)
+  def getCOPModel(copModelId: String): COPModel = {
+    val copModels: MongoCollection[COPModel] = database.withCodecRegistry(copModelCodecRegistry).getCollection("copModels")
+    val copModelsFuture = copModels.find(equal("_id", BsonObjectId(copModelId))).first().toFuture()
+    Await.result(copModelsFuture, 30 seconds)
   }
 
   /**
