@@ -6,7 +6,6 @@ import com.mongodb.spark.MongoSpark
 import com.mongodb.spark.sql.fieldTypes.ObjectId
 import com.mongodb.spark.sql.helpers.StructFields
 import es.us.idea.cop._
-import es.us.idea.cop.definitions.ModelDefinitions
 import es.us.idea.exceptions._
 import es.us.idea.exceptions.datasource._
 import es.us.idea.listeners.SparkListenerShared
@@ -46,7 +45,7 @@ object COPJob {
       */
     val fabiolaDatabase = new FabiolaDatabase(fabiolaDBUri, fabiolaDBName)
     val instance = fabiolaDatabase.getInstance(instanceId)
-    val modelDefinition = fabiolaDatabase.getModelDefinition(instance.modelDefinition.toString)
+    val copModel = fabiolaDatabase.getCOPModel(instance.copModel.toString)
     val dataset = fabiolaDatabase.getDataset(instance.dataset.toString)
 
     /**
@@ -65,7 +64,7 @@ object COPJob {
       .zipWithIndex.map(x => col("modelOutput.metrics").getItem(x._2).as(x._1))
     val other = instance.ot.map(col(_))
 
-    var selectCols = Seq(column("instanceId"), column("in"), column("out"))
+    var selectCols = Seq(column("instance"), column("in"), column("out"))
 
     if (other.nonEmpty) selectCols = selectCols :+ column("ot")
     if (includeMetrics) selectCols = selectCols :+ column("metrics")
@@ -95,7 +94,7 @@ object COPJob {
     try {
       /** Generate the model class string
         */
-      val modelBuilder = new ModelBuilder(modelDefinition)
+      val modelBuilder = new ModelBuilder(copModel)
       val classStr = modelBuilder.buildClass
 
       /** Create the User Defined Functions
@@ -118,7 +117,7 @@ object COPJob {
         */
       ds = ds
         .withColumn("modelOutput", explode(array(executeCopUdf(struct(in: _*)))))
-        .withColumn("instanceId", toObjectId())
+        .withColumn("instance", toObjectId()) // Inserts the instanceId
         .withColumn("in", struct(in: _*))
         .withColumn("out", struct(out: _*))
 
@@ -137,18 +136,18 @@ object COPJob {
       case e: ErrorConnectingToDatasource => SparkListenerShared.setErrorMsg("Error connecting to datasource")
       case e: PathNotFoundException => SparkListenerShared.setErrorMsg("Path not found")
       case e: AnalysisException => SparkListenerShared.setErrorMsg(e.getMessage) //Thrown if some column name doesn't exist
-      case e: SparkException => { // These exception are expected to be thrown if they happen inside the COP definition
+      case e: SparkException => { // These exception are expected to be thrown if they happen inside the COP Model
         val t = ExceptionUtils.getRootCause(e)
         t match {
           case cce: ClassCastException => SparkListenerShared.setErrorMsg(t.getMessage)
           case cce: ToolBoxError => SparkListenerShared.setErrorMsg(t.getMessage)
           case _ => {
             // Check if one of the root causes is InvocationTargetException. That may be caused by an exception thrown
-            // in the Model Definition
+            // in the COP Model
             val iteOpt = ExceptionUtils.getThrowableList(e).asScala
               .filter(x => x.getClass equals classOf[InvocationTargetException]).headOption
             if(iteOpt.isDefined){
-              SparkListenerShared.setErrorMsg(s"Exception thrown from ModelDefinition: ${t}")
+              SparkListenerShared.setErrorMsg(s"Exception thrown from COPModel: ${t}")
             }
           }
         }

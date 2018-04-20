@@ -5,7 +5,7 @@ import org.mongodb.scala.bson.ObjectId
 case class Instance
             (
               _id: ObjectId,
-              modelDefinition: ObjectId,
+              copModel: ObjectId,
               dataset: ObjectId,
               in: Seq[String],
               out: Seq[String],

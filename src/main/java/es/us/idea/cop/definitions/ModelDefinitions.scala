@@ -2,9 +2,9 @@ package es.us.idea.cop.definitions
 
 import es.us.idea.dao._
 
-object ModelDefinitions {
+object COPModels {
 
-  val hidrocantabricoDef = ModelDefinition(
+  val hidrocantabricoDef = COPModel(
     "Hidrocantabrico COP"
     ,
     """
@@ -95,7 +95,7 @@ object ModelDefinitions {
   """.stripMargin
   )
 
-  val endesaDef = ModelDefinition(
+  val endesaDef = COPModel(
     "ENDESA COP"
     ,
     """
@@ -189,7 +189,7 @@ object ModelDefinitions {
     """.stripMargin
   )
 
-  val conquenseDef = ModelDefinition(
+  val conquenseDef = COPModel(
     "Conquense COP"
     ,
     """
@@ -283,7 +283,7 @@ object ModelDefinitions {
 
 
   def main(args: Array[String]) = {
-    println(conquenseDef.definition.replaceAll("\n", "\\\\n").replaceAll("\"", "\\\\\""))
+    println(conquenseDef.model.replaceAll("\n", "\\\\n").replaceAll("\"", "\\\\\""))
   }
 
 }
