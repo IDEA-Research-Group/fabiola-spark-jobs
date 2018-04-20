@@ -2,7 +2,7 @@ package es.us.idea.cop
 
 import es.us.idea.dao._
 
-class ModelBuilder(modelDefinition: ModelDefinition
+class ModelBuilder(modelDefinition: COPModel
                    /*May also receive the IN and OUT lists
                    * and write the access to each property
                    * using the map*/) {
@@ -16,7 +16,7 @@ class ModelBuilder(modelDefinition: ModelDefinition
       "class COPReflect { \n" +
       "def executeCop(in: Map[String, Any]): ModelOutput = { \n" +
       "val model = new Model(\"" + modelDefinition.name + "\") \n" +
-      modelDefinition.definition + "\n" +
+      modelDefinition.model + "\n" +
       // modelDefinition.domainData + "\n" +
       // modelDefinition.variables + "\n" +
       // modelDefinition.constraints + "\n" +
