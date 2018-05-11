@@ -1,8 +1,8 @@
-package es.us.idea.dataQuality.internal.businessRules
+package es.us.idea.dataQuality.internal.businessRules.basic
 
-import es.us.idea.dataQuality.DQFunction.getValueOfKey
+import es.us.idea.dataQuality.internal.businessRules.BusinessRule
 
-abstract class AbstractBusinessRule(field: String, values: Seq[String]) extends BusinessRule {
+abstract class AbstractBusinessRule(field: String, values: Seq[Any]) extends BusinessRule {
 
   def operation(fieldValue: Any): Int
 
