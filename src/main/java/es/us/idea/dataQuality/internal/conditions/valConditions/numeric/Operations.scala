@@ -1,4 +1,4 @@
-package es.us.idea.dataQuality.internal.businessRules.basic.numeric
+package es.us.idea.dataQuality.internal.conditions.valConditions.numeric
 
 sealed trait Operations
 
@@ -11,4 +11,3 @@ case object lt extends Operations
 case object let extends Operations
 
 case object between extends Operations
-

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import es.us.idea.dataQuality.internal.DataQuality
-import es.us.idea.dataQuality.internal.businessRules.basic.numeric.{FieldGreaterEqThanBR, FieldGreaterThanBR, FieldLessEqThanBR, FieldLessThanBR}
-import es.us.idea.dataQuality.internal.businessRules.basic.{FieldBetweenBR, FieldMatchesBR, FieldNotNullBR}
-import es.us.idea.dataQuality.internal.businessRules.operations.{AndBRO, IfBRO, NotBRO}
-import es.us.idea.dataQuality.internal.businessRules.BusinessRule
+//import es.us.idea.dataQuality.internal.businessRules.basic.numeric.{FieldGreaterEqThanBR, FieldGreaterThanBR, FieldLessEqThanBR, FieldLessThanBR}
+//import es.us.idea.dataQuality.internal.businessRules.basic.{FieldBetweenBR, FieldMatchesBR, FieldNotNullBR}
+//import es.us.idea.dataQuality.internal.businessRules.operations.{AndBRO, IfBRO, NotBRO}
+//import es.us.idea.dataQuality.internal.businessRules.BusinessRule
 import es.us.idea.dataQuality.internal.dimension._
 
 import scala.io.Source
@@ -54,7 +54,7 @@ object DQFunction {
 
   // Niega la expresion
   def not(binaryDq: Int): Int = 1 - binaryDq
-
+/*
   def main(args: Array[String]) = {
 
     val in = Map(
@@ -357,4 +357,5 @@ object DQFunction {
 
 
   }
+*/
 }

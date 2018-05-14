@@ -1,35 +1,36 @@
 package es.us.idea.dataQuality
 
-import java.lang.reflect.InvocationTargetException
-
-import com.mongodb.spark.MongoSpark
-import com.mongodb.spark.sql.fieldTypes.ObjectId
-import com.mongodb.spark.sql.helpers.StructFields
-import es.us.idea.cop._
-import es.us.idea.dataQuality.DQTests.{provinciasEsp, tarifas}
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import es.us.idea.dataQuality.internal.DataQuality
 import es.us.idea.dataQuality.internal.businessRules.BusinessRule
 import es.us.idea.dataQuality.internal.conditions.{If, True}
-import es.us.idea.dataQuality.internal.conditions.operators.{And, Not}
-import es.us.idea.dataQuality.internal.conditions.valConditions.{Between, Matches, NotNull}
+import es.us.idea.dataQuality.internal.conditions.operators.{And, Not, Or}
 import es.us.idea.dataQuality.internal.conditions.valConditions.numeric.{GreaterThan, LessEqThan, LessThan}
+import es.us.idea.dataQuality.internal.conditions.valConditions.{Between, Matches, NotNull}
 import es.us.idea.dataQuality.internal.decisionRules.{DecisionRule, DecisionRulesEngine}
-import es.us.idea.dataQuality.internal.dimension._
-import es.us.idea.utils.{Datasources, FabiolaDatabase, SparkRowUtils, Utils}
-import org.apache.spark.sql.{AnalysisException, Row, SparkSession}
-import org.apache.spark.sql.functions._
+import es.us.idea.dataQuality.internal.dimension.{AccuracyDQDimension, CompletenessDQDimension, ConsistencyDQDimension, CredibilityDQDimension}
 
-object DQJob {
-  //val provinciasEsp = Source.fromFile("/home/alvaro/datasets/provincias_es").getLines.toSeq
-  val provinciasEsp = Seq("Araba", "Álava", "Albacete", "Alicante", "Alacant", "Almería", "Ávila", "Badajoz", "Balears (Illes)", "Barcelona", "Burgos", "Cáceres", "Cádiz", "Castellón", "Castelló", "Ciudad Real", "Córdoba", "Coruña (A)", "Cuenca", "Girona", "Granada", "Guadalajara", "Gipuzkoa", "Huelva", "Huesca", "Jaén", "León", "Lleida", "Rioja (La)", "Lugo", "Madrid", "Málaga", "Murcia", "Navarra", "Ourense", "Asturias", "Palencia", "Palmas (Las)", "Pontevedra", "Salamanca", "Santa Cruz de Tenerife", "Cantabria", "Segovia", "Sevilla", "Soria", "Tarragona", "Teruel", "Toledo", "Valencia", "València", "Valladolid", "Bizkaia", "Zamora", "Zaragoza", "Ceuta", "Melilla")
+import scala.io.Source
+import scala.util.Try
 
-  //val tarifas = Source.fromFile("/home/alvaro/datasets/tarifas").getLines.toSeq
-  val tarifas = Seq("2.0DHA", "2.1DHA", "3.1A", "6.2", "2.1DHS", "6.1B", "6.1A", "2.1A", "2.0DHS", "3.0A", "6.3", "2.0A", "6.4")
+object DQTests {
+  val dato: Any = "Empresa distribuidora"
+
+  val provinciasEsp = Source.fromFile("/home/alvaro/datasets/provincias_es").getLines.toSeq
+  val tarifas = Source.fromFile("/home/alvaro/datasets/tarifas").getLines.toSeq
+
+
+  val inTipo = Map("ICPInstalado" -> "Icp no instalado", "derechosExtension" -> 32.91, "tension" -> "3X220/380V", "propiedadEqMedidaTitular" -> "Empresa distribuidora",
+    "potenciaContratada" -> Map("p4" -> 0.0, "p5" -> 0.0, "p3" -> 32.91, "p2" -> 32.91, "p1" -> 32.91, "p6" -> 0.0), "impagos" -> "NO", "tipoFrontera" -> 4,
+    "tarifa" -> "3.0A", "ubicacionPoblacion" -> "SOMO", "potMaxBie" -> 32.91, "distribuidora" -> "0027 - VIESGO DISTRIBUCION ELECTRICA, S.L.", "fechaAltaSuministro" -> "24/04/1991", "DH" -> "DH3", "totalFacturaActual" -> 4098.68,
+
+    //"propiedadICPTitular" -> "Empresa distribuidora", "importeGarantia" -> 184.11, "ubicacionCodigoPostal" -> 39140, "cups" -> "ES0027700021513001JL0F", "fechaUltimoMovimientoContrato" -> "03/01/2016", "titularTipoPersona" -> "F", "titularViviendaHabitual" -> "N", "precioTarifa" -> Map("p1" -> 11.0, "p2" -> 7.0, "p3" -> 4.0), "fechaLimiteDerechosExtension" -> "31/12/9999", "fechaUltimoCambioComercial" -> "03/01/2016", "tipoPerfil" -> "Pc", "ubicacionProvincia" -> "Cantabria", "consumo" -> Seq(Map("potencias" -> Map("p4" -> 0.0, "p5" -> 0.0, "p3" -> 1.0, "p2" -> 2.0, "p1" -> 2.0, "p6" -> 0.0), "anio" -> 2014, "diasFacturacion" -> 6, "fechaInicioLectura" -> "28/05/2014", "fechaFinLectura" -> "03/06/2014")), "fechaUltimaLectura" -> "02/02/2016", "potMaxActa" -> null, "potMaxActa" -> 32.91)
+    "propiedadICPTitular" -> dato, "importeGarantia" -> 184.11, "ubicacionCodigoPostal" -> 39140, "cups" -> "ES0027700021513001JL0F", "fechaUltimoMovimientoContrato" -> "03/01/2016", "titularTipoPersona" -> "F", "titularViviendaHabitual" -> "N", "precioTarifa" -> Map("p1" -> 11.0, "p2" -> 7.0, "p3" -> 4.0), "fechaLimiteDerechosExtension" -> "31/12/9999", "fechaUltimoCambioComercial" -> "03/01/2016", "tipoPerfil" -> "Pc", "ubicacionProvincia" -> "Cantabria", "consumo" -> Seq(Map("potencias" -> Map("p4" -> 0.0, "p5" -> 0.0, "p3" -> 1.0, "p2" -> 2.0, "p1" -> 2.0, "p6" -> 0.0), "anio" -> 2014, "diasFacturacion" -> 6, "fechaInicioLectura" -> "28/05/2014", "fechaFinLectura" -> "03/06/2014")), "fechaUltimaLectura" -> "02/02/2016", "potMaxActa" -> null, "potMaxActa" -> 32.91)
 
   def main(args: Array[String]) = {
 
-
-    // Definicion del objeto de dq
     val tariffRules = new And(Seq(
       new If(new Matches("tarifa", Seq("3.0A")), new GreaterThan("potenciaContratada.p1", Seq(15)), new True()),
       new If(new Matches("tarifa", Seq("3.0A")), new GreaterThan("potenciaContratada.p2", Seq(15)), new True()),
@@ -68,8 +69,8 @@ object DQJob {
 
     val dte = new DecisionRulesEngine(
       Seq(
-        new DecisionRule(new Between("dq", 0.75, 1.0), "bueno"),
-        new DecisionRule(new And(Seq(new LessThan("dq", 0.5), new GreaterThan("dq", 0.75))), "regular")
+        new DecisionRule(new Between("dq", 0.6, 1.0), "bueno"),
+        new DecisionRule(new And(Seq(new LessThan("dq", 0.6), new GreaterThan("dq", 0.5))), "regular")
       ),
       "malo"
     )
@@ -128,46 +129,103 @@ object DQJob {
       credibility = Option(credibilityDim),
       decisionRules = Option(dqDecisionRules)
     )
-    // fin
+
+    println(s"DataQuality: ${dq.getDqout(inTipo)}")
+    println()
+
+    //val matchTest = new WeightedBusinessRule(0.5, new And(Seq(new Not(new Matches("potenciaContratada.p3", 32.92)), new Matches("potenciaContratada.p6", 0))))
+    //val matchTest2 = new WeightedBusinessRule(0.5, new Not(new Matches("propiedadICPTitular", Seq("Empresa distribuidora", null))))
 
 
+    println(s"dq ${dq.getDqout(inTipo)}")
 
-    var sparkBuilder = SparkSession
-      .builder()
-      .master("local[*]")
-      .appName(s"DataQuality-Experimental")
-      // .config("spark.extraListeners", "es.us.idea.listeners.FabiolaSparkListener")
-      // .config("spark.mongodb.output.uri", s"${Utils.removeLastSlashes(fabiolaDBUri)}/$fabiolaDBName.results")
+    //println(s"cualitativo ${accuracyDim.getQualitativeDQ(inTipo)}")
 
-    val spark = sparkBuilder.getOrCreate()
 
-    val dqFunction = (row: Row) => {
-      val dqin = SparkRowUtils.fromRowToMap(row)
-      dq.getDqout(dqin)
-    }
+    val jsonStr =
+      """
+        |{
+        |  "accuracy": {
+        |    "type": "accuracy",
+        |    "weight": 0.2,
+        |    "businessRules": [
+        |      {
+        |        "weight": 0.5,
+        |        "condition": {
+        |          "type": "matches",
+        |          "key": "ubicacionProvincia",
+        |          "values": [
+        |            "Asturias",
+        |            "Burgos",
+        |            "Cantabria",
+        |            "Lugo",
+        |            "Las demás provincias"
+        |          ]
+        |        }
+        |      },
+        |      {
+        |        "weight": 0.5,
+        |        "condition": {
+        |          "type": "matches",
+        |          "key": "ubicacionProvincia",
+        |          "values": [
+        |              "2.0DHA",
+        |              "2.1DHA",
+        |              "3.1A",
+        |              "6.2",
+        |              "2.1DHS",
+        |              "6.1B",
+        |              "6.1A",
+        |              "2.1A",
+        |              "2.0DHS",
+        |              "3.0A",
+        |              "6.3",
+        |              "2.0A",
+        |              "6.4"
+        |          ]
+        |        }
+        |      }
+        |    ],
+        |    "decisionRules": {
+        |      "decisionRules": [
+        |        {
+        |          "condition": {
+        |            "type": "between",
+        |            "key": "dq",
+        |            "lowerBound": 0.6,
+        |            "higherBound": 1.0
+        |          }
+        |        },
+        |        {
+        |          "condition": {
+        |            "type": "and",
+        |            "conditions": [
+        |              {
+        |                "type": "lt",
+        |                "key": "dq",
+        |                "values": [0.6]
+        |              },
+        |              {
+        |                "type": "gt",
+        |                "key": "dq",
+        |                "values": [0.5]
+        |              }
+        |            ]
+        |          }
+        |        }
+        |      ],
+        |      "default": "malo"
+        |    }
+        |  }
+        |}
+      """.stripMargin
 
-    val executeDQUdf = udf((row: Row) => {
-      dqFunction(row)
-    })
+    val objectMapper = new ObjectMapper with ScalaObjectMapper
+    objectMapper.registerModule(DefaultScalaModule)
 
-    val dqin = Seq("ubicacionProvincia", "tarifa", "propiedadICPTitular", "potenciaContratada").map(col(_))
-    // TODO OJO: siempre va a devolver las cuatro métricas. Esto serviria para para convertir la lista a columnas
-    //val dqout = Seq("dataQuality", "accuracy", "completness", "credibility", "consistency").zipWithIndex.map(x => col("tempdqout").getItem(x._2).as(x._1))
+    val jsonBR = objectMapper.readValue[DataQuality](jsonStr)
 
-    val ds = spark.read.json("/home/alvaro/datasets/hidrocantabrico_split.json")
-    //val hidrocantabrico = spark.read.json("/home/alvaro/datasets/endesa_datos_agregados_split.json")
-    //  .map()
-    .withColumn("dqout", explode(array(executeDQUdf(struct(dqin: _*))))) // TODO Bastaría con esta column
-      .withColumn("dqout.dataQuality", col("dqout.dataQuality"))
-      .withColumn("dqout.accuracy", col("dqout.accuracy"))
-      .withColumn("dqout.completness", col("dqout.completeness"))
-      .withColumn("dqout.credibility", col("dqout.credibility"))
-      .withColumn("dqout.consistency", col("dqout.consistency"))
-    //    .withColumn("dqout", struct(dqout: _*))
-
-    ds.printSchema
-    ds.show(500)
-    //hidrocantabrico.select("tarifa").distinct.show
+    println(s"Prueba desde json ${jsonBR.getDqout(inTipo)}")
 
   }
 }

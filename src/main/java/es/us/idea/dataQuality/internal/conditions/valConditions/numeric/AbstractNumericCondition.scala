@@ -1,14 +1,14 @@
-package es.us.idea.dataQuality.internal.businessRules.basic.numeric
+package es.us.idea.dataQuality.internal.conditions.valConditions.numeric
 
 import es.us.idea.dataQuality.Utils
-import es.us.idea.dataQuality.internal.businessRules.basic.{AbstractBusinessRule, numeric}
+import es.us.idea.dataQuality.internal.conditions.valConditions.ValueCondition
+import es.us.idea.dataQuality.internal.conditions.valConditions.numeric
 
-abstract class AbstractNumericFieldBR(field: String, values: Seq[Any], op: Operations) extends AbstractBusinessRule(field, values) {
+abstract class AbstractNumericCondition(key: Any, values: Seq[Any], op: Operations) extends ValueCondition(key, values) {
 
-
-  override def operation(fieldValue: Any): Int = {
-    if (Utils.toDouble(fieldValue).isEmpty) return 0
-    if (values.count(f(Utils.toDouble(fieldValue).get, _, op)) > 0) 1 else 0
+  override def operation(value: Any): Boolean = {
+    if (Utils.toDouble(value).isEmpty) return false
+    values.count(f(Utils.toDouble(value).get, _, op)) > 0
   }
 
   private def f(fieldValue: Double, iteratorValue: Any, op: Operations): Boolean = {
@@ -22,4 +22,5 @@ abstract class AbstractNumericFieldBR(field: String, values: Seq[Any], op: Opera
       case _ => return false
     }
   }
+
 }
