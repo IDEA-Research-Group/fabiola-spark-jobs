@@ -13,13 +13,8 @@ class DataQuality(
                  ) extends Serializable {
 
   // It weights the dimensions DQ
-  def calculateDQ(in: Map[String, Any]): Double = {
-    Seq(accuracy, completeness, consistency, credibility).filter(_.isDefined).map(_.get.calculateWeightedDimensionDQ(in)).sum
-  }
-
-  // Return a map where keys are the dimensions and the values are the dimension objects
-  private def getDimensionsMap: Map[String, Option[AbstractDQDimension]] = {
-    Map("accuracy" -> accuracy, "completeness" -> completeness, "consistency" -> consistency, "credibility" -> credibility)
+  def calculateDQ(dqin: Map[String, Any]): Double = {
+    Seq(accuracy, completeness, consistency, credibility).filter(_.isDefined).map(_.get.calculateWeightedDimensionDQ(dqin)).sum
   }
 
   // Calculates the DataQuality from the individual dimension DQs
@@ -31,6 +26,11 @@ class DataQuality(
       case "credibility" => if (credibility.isDefined) Option(credibility.get.calculateDimensionDQ(in)) else None
       case _ => None
     }
+  }
+
+  // Return a map where keys are the dimensions and the values are the dimension objects
+  private def getDimensionsMap: Map[String, Option[AbstractDQDimension]] = {
+    Map("accuracy" -> accuracy, "completeness" -> completeness, "consistency" -> consistency, "credibility" -> credibility)
   }
 
   // The final DQ value is weighted.
@@ -47,6 +47,7 @@ class DataQuality(
 
     val dqQualitative = if(decisionRules.isDefined){
       val dimensionsQualitative = dqoutMap
+        .filter{case (k, v) => v.isDefined}
         .map{case (k, v) => (k, v.get.qualitative)}
         .filter{case (k, v) => v.isDefined}
         .map{case (k, v) => (k, v.get)}

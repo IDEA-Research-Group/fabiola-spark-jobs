@@ -18,7 +18,6 @@ abstract class AbstractNumericCondition(key: Any, values: Seq[Any], op: Operatio
       case numeric.get => return fieldValue >= Utils.toDouble(iteratorValue).get
       case numeric.lt => return fieldValue < Utils.toDouble(iteratorValue).get
       case numeric.let => return fieldValue <= Utils.toDouble(iteratorValue).get
-      case numeric.between => return fieldValue <= Utils.toDouble(iteratorValue).get
       case _ => return false
     }
   }
