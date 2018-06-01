@@ -2,6 +2,8 @@ package es.us.idea.listeners
 
 import es.us.idea.utils.FabiolaDatabase
 
+import scala.collection.concurrent.TrieMap
+
 /**
   * This Object is intended to share some variables with the Fabiola Spark Listener.
   */
@@ -13,6 +15,7 @@ object SparkListenerShared {
   var hasSuccessfullyFinished: Boolean = false
   var startTime: Option[Long] = None
   var endTime: Option[Long] = None
+  //var executorCpuTimes: TrieMap[String, Long] = TrieMap()
 
   def setFabiolaDatabase(fabiolaDatabase: FabiolaDatabase) = this.fabiolaDatabase = Option.apply(fabiolaDatabase)
   def setDatasetId(datasetId: String) = this.datasetId = Option.apply(datasetId)

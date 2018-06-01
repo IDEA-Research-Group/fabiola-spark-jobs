@@ -45,7 +45,7 @@ object COPModels {
     |          case 2 => precioTarifa.get("p3").get.toInt
     |        }
     |
-    |        val dias = consumoActual(i).get("diasFacturacion").get.asInstanceOf[Int].toInt
+    |        val dias = consumoActual(i).get("diasFacturacion").get.asInstanceOf[Long].toInt
     |
     |        model.ifThen(
     |          model.arithm(model.intScaleView(potenciaContratada(j), 85), ">", pm * 100),
