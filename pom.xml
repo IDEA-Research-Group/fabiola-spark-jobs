@@ -6,7 +6,7 @@
 
     <groupId>es.us.idea</groupId>
     <artifactId>fabiola</artifactId>
-    <version>0.5.2-BETA</version>
+    <version>0.6.0-BETA-WG.0.2</version>
 
     <dependencies>
         <dependency>
@@ -66,6 +66,15 @@
             <artifactId>json4s-jackson_2.12</artifactId>
             <version>3.5.3</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryo -->
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+
+
     </dependencies>
 
     <repositories>
