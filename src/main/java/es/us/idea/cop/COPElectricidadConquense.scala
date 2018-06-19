@@ -1,12 +1,13 @@
 package es.us.idea.cop
 
+import es.us.idea.utils.Default
 import org.chocosolver.solver._
 import org.chocosolver.solver.search.limits.TimeCounter
 import org.chocosolver.solver.variables.IntVar
 
 object COPElectricidadConquense {
-  def executeCop(in: Map[String, Any]):Map[String, Any] = {
-    println(in)
+  def executeCop(in: Map[String, Any], objectiveUpperBound: Int) = {
+    //println(in)
     val consumoActual = in.get("consumos").get.asInstanceOf[Seq[Map[String, Any]]]
     val model = new Model("ElectricityCOP")
 
@@ -20,16 +21,16 @@ object COPElectricidadConquense {
       * Variables
       * ***********************************************************/
     val TP = model.intVarArray("gasto mensual", consumoActual.length, IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND)
-    val TPTotal = model.intVar("Coste total", IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND)
+    val TPTotal = model.intVar("Coste total", IntVar.MIN_INT_BOUND, objectiveUpperBound * 100 * scale)
 
     val potenciaContratada = model.intVarArray("Potencias contratadas", 3, 0, IntVar.MAX_INT_BOUND)
 
     val potenciaFactura = model.intVarMatrix("Potencia Factura", consumoActual.length, 3, 0, IntVar.MAX_INT_BOUND)
     val terminoPotencia = model.intVarMatrix("Termino Potencia", consumoActual.length, 3, 0, IntVar.MAX_INT_BOUND)
 
-    potenciaContratada(0) = model.intVar("Potencia Contratada 1", 0, IntVar.MAX_INT_BOUND)
-    potenciaContratada(1) = model.intVar("Potencia Contratada 2", 0, IntVar.MAX_INT_BOUND)
-    potenciaContratada(2) = model.intVar("Potencia Contratada 3", 0, IntVar.MAX_INT_BOUND)
+    potenciaContratada(0) = model.intVar("Potencia Contratada 1", 1, IntVar.MAX_INT_BOUND)
+    potenciaContratada(1) = model.intVar("Potencia Contratada 2", 1, IntVar.MAX_INT_BOUND)
+    potenciaContratada(2) = model.intVar("Potencia Contratada 3", 1, IntVar.MAX_INT_BOUND)
 
     /** ***********************************************************
       * Restricciones
@@ -40,16 +41,16 @@ object COPElectricidadConquense {
         // pm is scaled 10 times
         val pm = scale * ( j match {
           case 0 => math.max(
-            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[BigInt].toInt,
-            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[BigInt].toInt
+            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Long].toInt,
+            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Long].toInt
           )
           case 1 => math.max(
-            consumoActual(i).get("potencia_maxima_p2").get.asInstanceOf[BigInt].toInt,
-            consumoActual(i).get("potencia_maxima_p5").get.asInstanceOf[BigInt].toInt
+            consumoActual(i).get("potencia_maxima_p2").get.asInstanceOf[Long].toInt,
+            consumoActual(i).get("potencia_maxima_p5").get.asInstanceOf[Long].toInt
           )
           case 2 => math.max(
-            consumoActual(i).get("potencia_maxima_p3").get.asInstanceOf[BigInt].toInt,
-            consumoActual(i).get("potencia_maxima_p6").get.asInstanceOf[BigInt].toInt
+            consumoActual(i).get("potencia_maxima_p3").get.asInstanceOf[Long].toInt,
+            consumoActual(i).get("potencia_maxima_p6").get.asInstanceOf[Long].toInt
           )
         })
 
@@ -59,7 +60,7 @@ object COPElectricidadConquense {
           case 2 => precioTarifa.get("p3").get.toInt
         }
 
-        val dias = consumoActual(i).get("dias_facturacion").get.asInstanceOf[BigInt].toInt
+        val dias = consumoActual(i).get("dias_facturacion").get.asInstanceOf[Long].toInt
 
         model.ifThen(
           model.arithm(model.intScaleView(potenciaContratada(j), 85), ">", pm * 100),
@@ -93,12 +94,29 @@ object COPElectricidadConquense {
     val solver = model.getSolver
     val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, 5000000000L))
 
-    val statistics = Map("time"->solver.getTimeCount, "buildingTime" -> solver.getReadingTimeCount, "totalTime" -> (solver.getTimeCount + solver.getReadingTimeCount), "variableCount" -> model.getNbVars,  "constraintCount" -> model.getNbCstrs)
+    val metrics = Seq(solver.getTimeCount.toDouble,solver.getReadingTimeCount.toDouble, (solver.getTimeCount + solver.getReadingTimeCount).toDouble, model.getNbVars.toDouble, model.getNbCstrs.toDouble)
 
-    if(solution != null)
-      Map("optimal" -> solution.getIntVal(TPTotal) / (100.0 * scale), "p1" -> solution.getIntVal(potenciaContratada(0)) / scale.toDouble, "p2" -> solution.getIntVal(potenciaContratada(1)) / scale.toDouble, "p3" -> solution.getIntVal(potenciaContratada(2)) / scale.toDouble) ++ statistics
-    else
-      Map("error" -> true, "errorCause"-> "Solution not found") ++ statistics
+    if(solution != null){
+      ModelOutput(
+        Seq(
+          solution.getIntVal(TPTotal) / (100.0 * scale),
+          solution.getIntVal(potenciaContratada(0)) / scale.toDouble,
+          solution.getIntVal(potenciaContratada(1)) / scale.toDouble,
+          solution.getIntVal(potenciaContratada(2)) / scale.toDouble
+        ),
+        metrics
+      )
+    } else {
+      ModelOutput(
+        Seq(
+          -1.0/*Default.DefaultDouble.default*/,
+          -1.0/*Default.DefaultDouble.default*/,
+          -1.0/*Default.DefaultDouble.default*/,
+          -1.0/*Default.DefaultDouble.default*/
+        ),
+        metrics
+      )
+    }
 
   }
 }
