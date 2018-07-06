@@ -116,22 +116,25 @@ object COPJobDataLinking {
       /**
         * Apply the COP
         */
-      ds = ds
-        .withColumn("modelOutput", explode(array(executeCopUdf(struct(in: _*)))))
-        .withColumn("instance", toObjectId()) // Inserts the instanceId
-        .withColumn("in", struct(in: _*))
-        .withColumn("out", struct(out: _*))
 
-      ds.printSchema
+      ds.select("consumo.potencias.p1", "consumo.potencias.p2", "consumo.potencias.p3").printSchema
 
-      if (other.nonEmpty) ds = ds.withColumn("ot", struct(other: _*))
-      if (includeMetrics) ds = ds.withColumn("metrics", struct(metrics: _*))
-
-      ds = ds.select(selectCols: _*)
-
-      MongoSpark.save(ds)
-
-      SparkListenerShared.setHasSuccessfullyFinished
+//      ds = ds
+//        .withColumn("modelOutput", explode(array(executeCopUdf(struct(in: _*)))))
+//        .withColumn("instance", toObjectId()) // Inserts the instanceId
+//        .withColumn("in", struct(in: _*))
+//        .withColumn("out", struct(out: _*))
+//
+//      ds.printSchema
+//
+//      if (other.nonEmpty) ds = ds.withColumn("ot", struct(other: _*))
+//      if (includeMetrics) ds = ds.withColumn("metrics", struct(metrics: _*))
+//
+//      ds = ds.select(selectCols: _*)
+//
+//      MongoSpark.save(ds)
+//
+//      SparkListenerShared.setHasSuccessfullyFinished
     } catch {
       case e: UnsupportedFormatException => SparkListenerShared.setErrorMsg("Unsupported format")
       case e: UnsupportedDatasourceException => SparkListenerShared.setErrorMsg("Unsupported datasource")

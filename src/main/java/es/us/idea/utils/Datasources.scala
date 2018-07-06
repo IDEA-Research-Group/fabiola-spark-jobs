@@ -36,7 +36,8 @@ class Datasources(spark: SparkSession, dataset: es.us.idea.dao.Dataset) {
     if (!List("json", "csv").contains(format)) throw new UnsupportedFormatException("Format not supported")
     try {
       if (format equals "json")
-        spark.read.json(s"hdfs://${dataset.hostname}:${dataset.port}/${dataset.path}")
+        //spark.read.json(s"hdfs://${dataset.hostname}:${dataset.port}/${dataset.path}")
+        spark.read.json(s"/home/alvaro/datasets/hidrocantabrico_split.json")
         //spark.read.json(s"${dataset.path}/fdsdfs")
       else
         spark.read.csv(s"hdfs://${dataset.hostname}:${dataset.port}/${dataset.path}")
