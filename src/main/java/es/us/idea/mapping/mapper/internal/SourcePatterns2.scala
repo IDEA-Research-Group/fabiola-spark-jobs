@@ -1,8 +1,8 @@
-package es.us.idea.mapping
+package es.us.idea.mapping.mapper.internal
 
 import Helpers._
 
-object SourcePatterns {
+object SourcePatterns2 {
 
   val inTipo = Map(
     "id" -> 500,
@@ -22,28 +22,29 @@ object SourcePatterns {
 
   //trait FieldTrait
 
-  trait Field[T] {
-    def getValue(in: Map[String, Any])(implicit ev: Any => Option[T]): T
-    def getDefault(): T
+  trait Field {
+    def getValue(in: Map[String, Any])/*(implicit ev: Option[Any] => Option[Number])*/: Option[Number]
+    // TODO getString & getNumber???
+    def getDefault(): Number
   }
 
-  trait ArrayField[T] {
-    def getValue(in: Map[String, Any])(implicit ev: Any => Option[T]): Seq[T]
-    def getDefault(): Seq[T]
+  trait ArrayField {
+    def getValue(in: Map[String, Any])(implicit ev: Option[Any] => Option[Number]): Seq[Number]
+    def getDefault(): Seq[Number]
   }
 
-  trait MatrixField[T] {
-    def getValue(in: Map[String, Any])(implicit ev: Any => Option[T]): Seq[Seq[T]]
-    def getDefault(): Seq[Seq[T]]
+  trait MatrixField {
+    def getValue(in: Map[String, Any])(implicit ev: Option[Any] => Option[Number]): Seq[Seq[Number]]
+    def getDefault(): Seq[Seq[Number]]
   }
 
   // FIELD
-  class BasicField[T](path: String, default: T, translations: Option[Any => Any] = None, transformations: Option[Seq[T => T]] = None) extends Field[T] {
-    override def getValue(in: Map[String, Any])(implicit ev: Any => Option[T]): T =
-      in.getValueFromPathOrElse(path, default).getAsOrElse[T](default, translations).applyPipeline(transformations.getOrElse(Seq()))
-    override def getDefault(): T = default
+  class BasicField(path: String, default: Option[Number]=None, translations: Option[Any => Number] = None, transformations: Option[Seq[Number => Number]] = None) extends Field {
+    override def getValue(in: Map[String, Any])/*(implicit ev: Option[Any] => Option[Number])*/: Option[Number] =
+      in.getValueFromPath(path).getAs[Number](translations).applyPipeline(transformations.getOrElse(Seq()))
+    override def getDefault(): Number = default
   }
-
+/*
   class BasicFromArrayField[T](arrayField: ArrayField[T], reduction: Seq[T] => T) extends Field[T] {
     override def getValue(in: Map[String, Any])(implicit ev: Any => Option[T]): T =
       arrayField.getValue(in).applyReduction(reduction) // Apply pipeline
@@ -164,7 +165,6 @@ object SourcePatterns {
 //
 //  }
 
-  def scale(scale: Double)(thisVal: Double): Double = thisVal * scale
 
   //def max(values: Seq[Double]): Double = values.max
   def max(values: Seq[Double]): Double = values.max
@@ -172,60 +172,69 @@ object SourcePatterns {
   def translate[T](translations: Map[Any, Any])(thisVal: Any): Any = translations.getOrElse(thisVal, thisVal)
 
   // TODO: translate date to int (timestamp), for example
+*/
+def scale(scale: Number)(thisVal: Number): Number = thisVal.getDouble * scale.getDouble
+
 
   def main(args: Array[String]) = {
-    //findPattern("consumo", inTipo)
 
-    import Field._
-    import ArrayField._
-    import MatrixField._
+    println("aa")
 
-    val tariff = field[Int]("tarifa", -1, translate(Map("3.0A" -> 4))(_) )
-    println(tariff.getValue(inTipo))
+    val f = new BasicField("tarifa", translations = Option(Map("3.0A" -> 1)), transformations = Option(Seq(scale(100))))
+    println(f.getValue(inTipo))
 
-    //val potMaxActa = field[Int]("potMaxActa", 10)
-    //println(potMaxActa.getValue(inTipo))
-
-    val ejemplos = arrayField[Double]("array", arrayField(Seq(
-      field("0", -1.0),
-      field("1", -1.0),
-      field("2", -1.0),
-      field("3", -1.0),
-      field("4", -1.0)
-    )))
-
-    println(ejemplos.getValue(inTipo))
-
-    val ejemplos2 = arrayField[Double]("array", Seq(0.0, 0.0, -1.0, -1.0, -1.0), -9.0)
-    println(ejemplos2.getValue(inTipo))
-
-    val comsumption = matrixField[Double]("consumo", arrayField[Double](Seq(
-
-      field[Double](arrayField(Seq(
-        field("potencias.p1", -1.0, Seq(scale(100.0)_)),
-        field("potencias.p4", -1.0, Seq(scale(100.0)_))
-      )), max _),
-
-      field[Double](arrayField(Seq(
-        field("potencias.p2", -1.0, Seq(scale(100.0)_)),
-        field("potencias.p5", -1.0, Seq(scale(100.0)_))
-      )), max _),
-
-      field[Double](arrayField(Seq(
-        field("potencias.p3", -1.0, Seq(scale(100.0)_)),
-        field("potencias.p6", -1.0, Seq(scale(100.0)_))
-      )), max _)
-    )), 12)
-
-    println(comsumption.getValue(inTipo))
-
-
-    val arrOfArrs = matrixField[Double]("ejemplo", arrayField[Double](Seq(
-      field("0", -1.0),
-      field("1", -1.0)
-    )), 12)
-
-    println(arrOfArrs.getValue(inTipo))
+//    //findPattern("consumo", inTipo)
+//
+//    import ArrayField._
+//    import Field._
+//    import MatrixField._
+//
+//    val tariff = field[Int]("tarifa", -1, translate(Map("3.0A" -> 4))(_) )
+//    println(tariff.getValue(inTipo))
+//
+//    //val potMaxActa = field[Int]("potMaxActa", 10)
+//    //println(potMaxActa.getValue(inTipo))
+//
+//    val ejemplos = arrayField[Double]("array", arrayField(Seq(
+//      field("0", -1.0),
+//      field("1", -1.0),
+//      field("2", -1.0),
+//      field("3", -1.0),
+//      field("4", -1.0)
+//    )))
+//
+//    println(ejemplos.getValue(inTipo))
+//
+//    val ejemplos2 = arrayField[Double]("array", Seq(0.0, 0.0, -1.0, -1.0, -1.0), -9.0)
+//    println(ejemplos2.getValue(inTipo))
+//
+//    val comsumption = matrixField[Double]("consumo", arrayField[Double](Seq(
+//
+//      field[Double](arrayField(Seq(
+//        field("potencias.p1", -1.0, Seq(scale(100.0)_)),
+//        field("potencias.p4", -1.0, Seq(scale(100.0)_))
+//      )), max _),
+//
+//      field[Double](arrayField(Seq(
+//        field("potencias.p2", -1.0, Seq(scale(100.0)_)),
+//        field("potencias.p5", -1.0, Seq(scale(100.0)_))
+//      )), max _),
+//
+//      field[Double](arrayField(Seq(
+//        field("potencias.p3", -1.0, Seq(scale(100.0)_)),
+//        field("potencias.p6", -1.0, Seq(scale(100.0)_))
+//      )), max _)
+//    )), 12)
+//
+//    println(comsumption.getValue(inTipo))
+//
+//
+//    val arrOfArrs = matrixField[Double]("ejemplo", arrayField[Double](Seq(
+//      field("0", -1.0),
+//      field("1", -1.0)
+//    )), 12)
+//
+//    println(arrOfArrs.getValue(inTipo))
 
 
 

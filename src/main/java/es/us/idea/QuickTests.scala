@@ -1,19 +1,21 @@
 package es.us.idea
 
+import java.lang.instrument.Instrumentation
+
+import es.us.idea.cop.ClassCompiler
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.DataType
+
+import scala.util.Try
+
+
 object QuickTests {
 
+
   def main(args: Array[String]) = {
-    val x =  417
-    val y = 10
-    val z = math.ceil(x.toDouble / y).toInt
 
-    println(z)
-
-    val s = Seq(1, 2, 3, 4, 5)
-
-    val  res = s.scan(0)(_ + _)//.drop(1)
-
-    println(res)
+    println("aaaaaaaaaaaaaa")
   }
 
 }

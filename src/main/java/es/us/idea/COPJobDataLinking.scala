@@ -9,11 +9,13 @@ import es.us.idea.cop.definitions.COPModels
 import es.us.idea.dao.{Instance, SystemConfig}
 import es.us.idea.exceptions.datasource._
 import es.us.idea.listeners.SparkListenerShared
-import es.us.idea.utils.{Datasources, FabiolaDatabase, Utils}
+import es.us.idea.utils._
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.spark.SparkException
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{AnalysisException, Row, SparkSession}
+import org.apache.spark.sql.types.{DataTypes, IntegerType, StructField, StructType}
+import org.apache.spark.sql._
 import org.mongodb.scala.bson.ObjectId
 
 import scala.collection.JavaConverters._
@@ -108,6 +110,32 @@ object COPJobDataLinking {
         ObjectId(instanceId)
       })
 
+      // TODO take the data model from Mongo
+      val dmSelector = Seq(
+        DMSelect("a", "Int"),
+        DMSelect("b", "String"),
+        DMSelect("c", "Double"),
+        DMSelect("matrix", "DoubleMatrix")
+      )
+
+      val dt = mapping.Utils.generateDataTypeFromDMSelector(dmSelector)
+
+      val dataMappingUdf = udf((row: Row) => {
+        val map = Map("a" -> 1, "b" -> "prueba", "c" -> 5.0, "matrix" -> Seq(Seq(1.0, 2.0), Seq(-1.0, -2.0)))
+        //val a: Any = 1
+        //Row.apply(a, 21, "aaasa", Seq(Seq(1.0, 2.0), Seq(-1.0, -2.0)))
+        mapping.Utils.buildRowFromMapAndDMSelector(map, dmSelector)
+
+      }, //Utils.generateDataType(map)
+        //DataTypes.createStructType(Array(
+        //  DataTypes.createStructField("a", DataTypes.IntegerType, true ),
+        //  DataTypes.createStructField("b", DataTypes.IntegerType, true ),
+        //  DataTypes.createStructField("c", DataTypes.StringType, true ),
+        //  DataTypes.createStructField("matrix", DataTypes.createArrayType(DataTypes.createArrayType(DataTypes.DoubleType)), true)
+        //))
+        dt
+      )
+
       /** Create the datasource and get the dataset
         */
       val datasource = new Datasources(spark, dataset)
@@ -117,9 +145,22 @@ object COPJobDataLinking {
         * Apply the COP
         */
 
-      ds.select("consumo.potencias.p1", "consumo.potencias.p2", "consumo.potencias.p3").printSchema
+      //ds.select("consumo.potencias.p1", "consumo.potencias.p2", "consumo.potencias.p3").printSchema
+
+
+      ds.printSchema
 
 //      ds = ds
+//          .map(x =>  /* SparkRowUtils.fromRowToMap(x, None)*/)
+
+      ds = ds
+        .withColumn("modelOutput", explode(array(dataMappingUdf(struct(in: _*)))))
+
+      ds.printSchema
+      ds.show
+
+
+      //      ds = ds
 //        .withColumn("modelOutput", explode(array(executeCopUdf(struct(in: _*)))))
 //        .withColumn("instance", toObjectId()) // Inserts the instanceId
 //        .withColumn("in", struct(in: _*))

@@ -54,6 +54,7 @@
             <version>2.2.1</version>
             <scope>compile</scope>
         </dependency>
+
         <!-- Choco solver modified dependency -->
         <dependency>
             <groupId>org.choco-solver</groupId>
