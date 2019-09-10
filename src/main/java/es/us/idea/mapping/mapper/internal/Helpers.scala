@@ -1,9 +1,17 @@
 package es.us.idea.mapping.mapper.internal
 
 import scala.util.Try
-import Number._
 
 object Helpers {
+
+  /**
+    * General purpose helpers
+    *
+    */
+  // Implicit to avoid Option(null)
+  implicit class NotNullOption[T](val t: Try[T]) extends AnyVal {
+    def toNotNullOption = t.toOption.flatMap{Option(_)}
+  }
 
   /**
     * HELPERS FOR Map[String, Any]
@@ -42,9 +50,10 @@ object Helpers {
     * HELPERS FOR Option[Any]
     *
     * */
-
-  def transform[T](f:(Option[Any]) => Option[T]) = f
-  implicit val transformNumber = transform(opt => Try(createNumber(opt.get)).toOption) // Transform to Number
+  def transformOpt[T](f:(Option[Any]) => Option[T]) = f
+  implicit val transformOptNumber = transformOpt(opt => Number.createNumber(opt.get)) // Transform to Number
+  implicit val transformOptSeq = transformOpt(a => Try(asSeq(a.get).get).toOption)
+  implicit val transformOptMap = transformOpt(a => Try(asMap(a.get).get).toOption)
   //implicit val transformString = transform(opt => Try(opt.get.toString).toOption)      // Transform to String
 
 
@@ -57,17 +66,35 @@ object Helpers {
     def getAs[T](translations:  Option[Any => Any] = None)(implicit run: Option[Any] => Option[T]): Option[T] =
       if(translations.isDefined) run(Try(translations.get(opt.get)).toOption) else run(opt)
     //def getAsOrElse[T](default: T, translations: Option[Any => Any] = None)(implicit run: Any => Option[T]) = getAs[T](translations).getOrElse(default)
-
   }
 
+  /**
+    * Other type transformations
+    */
+
+  implicit class WrapSeqElements[T](val seq: Seq[T]) {
+    def wrap() = seq.map(Option(_))
+  }
 
   /**
     * Helpers for generic types.
     *
     * */
-  implicit class GenericType[T](t: Option[T]) {
+  implicit class Pipeline[T](t: Option[T]) {
     def applyPipeline(pipeline: Seq[T => T]) = Try(pipeline.foldLeft(t.get){case (acc, f) => f(acc)}).toOption
   }
 
+  implicit class Reduction[T](st: Option[Seq[Option[T]]]) {
+    def applyReduction(reduction: Seq[T] => T): Option[T] = Try(reduction(st.get.map(_.get))).toOption
+  }
+
+  implicit class MatrixReduction[T](st: Option[Seq[Option[Seq[Option[T]]]]]) { // TODO Mejorar
+    def applyReduction(reduction: Seq[Seq[T]] => Seq[T]): Option[Seq[Option[T]]] = Try(reduction(st.get.map(x => x.get.map(y => y.get))).map(Option(_))).toOption
+  }
+
+  // Converters
+
+  def asSeq(value: Any): Option[Seq[Any]] = Try(value.asInstanceOf[Seq[Any]]).toNotNullOption
+  def asMap(value: Any): Option[Map[String, Any]] = Try(value.asInstanceOf[Map[String, Any]]).toNotNullOption
 
 }

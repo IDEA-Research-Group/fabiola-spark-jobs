@@ -9,7 +9,10 @@ import es.us.idea.cop.definitions.COPModels
 import es.us.idea.dao.{Instance, SystemConfig}
 import es.us.idea.exceptions.datasource._
 import es.us.idea.listeners.SparkListenerShared
+import es.us.idea.mapping.mapper.DataMappingModel
+import es.us.idea.mapping.mapper.dsl.DSL.FieldGetter
 import es.us.idea.utils._
+import javax.script.{Compilable, ScriptEngine, ScriptEngineManager}
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.spark.SparkException
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
@@ -19,6 +22,8 @@ import org.apache.spark.sql._
 import org.mongodb.scala.bson.ObjectId
 
 import scala.collection.JavaConverters._
+import scala.tools.nsc.Settings
+import scala.tools.nsc.interpreter.{ILoop, IMain}
 import scala.tools.reflect.ToolBoxError
 
 /** COPJob
@@ -51,6 +56,18 @@ object COPJobDataLinking {
     val copModel = COPModels.hidrocantabricoDef // TODO change for production
     val dataset = fabiolaDatabase.getDataset(instance.dataset.toString)
 
+
+    val engine = new ScriptEngineManager().getEngineByName("scala").asInstanceOf[ScriptEngine with Compilable]
+    val settings = engine.asInstanceOf[scala.tools.nsc.interpreter.IMain].settings
+    //settings.embeddedDefaults[ToBasicField]
+    //settings.usejavacp.value = true
+    settings.usejavacp.value = true
+
+    engine.compile(""" println("hola..") """).eval
+
+
+
+
     /**
       * Configure the SparkListener shared variables
       */
@@ -71,6 +88,28 @@ object COPJobDataLinking {
 
     if (other.nonEmpty) selectCols = selectCols :+ column("ot")
     if (includeMetrics) selectCols = selectCols :+ column("metrics")
+
+//    val dmml = Seq(
+//      """ create int "TAR" from("tarifa" translate("3.0A" -> 0, "3.1A" -> 1) default -1) """,
+//      """ create double "MAXPOT" from(array("potenciaContratada.p1", "potenciaContratada.p2", "potenciaContratada.p3") reduce max) """,
+//      """ create doubleArray "PC" from(array("potenciaContratada.p1", "potenciaContratada.p2", "potenciaContratada.p3")) """,
+//      """ create doubleMatrix "POTENCIAS" from(matrix("consumo", array("potencias.p1", "potencias.p2", "potencias.p3"))) """
+//    )
+//
+//    val dmm = new DataMappingModel(dmml)
+//
+//
+//    val dmmSchema = dmm.getResultSchema
+
+//    val engine = new ScriptEngineManager().getEngineByName("scala")
+//    val settings = engine.asInstanceOf[scala.tools.nsc.interpreter.IMain].settings
+//    //settings.embeddedDefaults[FieldGetter]
+//    settings.usejavacp.value = true
+//
+//    engine.eval(
+//      """ println("hello world") """.stripMargin)
+//    engine.eval(""" :q """)
+
 
     /** Create the SparkSession object
       */
@@ -110,31 +149,33 @@ object COPJobDataLinking {
         ObjectId(instanceId)
       })
 
-      // TODO take the data model from Mongo
-      val dmSelector = Seq(
-        DMSelect("a", "Int"),
-        DMSelect("b", "String"),
-        DMSelect("c", "Double"),
-        DMSelect("matrix", "DoubleMatrix")
-      )
+      //// TODO take the data model from Mongo
+      //val dmSelector = Seq(
+      //  DMSelect("a", "Int"),
+      //  DMSelect("b", "String"),
+      //  DMSelect("c", "Double"),
+      //  DMSelect("matrix", "DoubleMatrix")
+      //)
 
-      val dt = mapping.Utils.generateDataTypeFromDMSelector(dmSelector)
 
-      val dataMappingUdf = udf((row: Row) => {
-        val map = Map("a" -> 1, "b" -> "prueba", "c" -> 5.0, "matrix" -> Seq(Seq(1.0, 2.0), Seq(-1.0, -2.0)))
-        //val a: Any = 1
-        //Row.apply(a, 21, "aaasa", Seq(Seq(1.0, 2.0), Seq(-1.0, -2.0)))
-        mapping.Utils.buildRowFromMapAndDMSelector(map, dmSelector)
+      //val dt = mapping.Utils.generateDataTypeFromDMSelector(dmSelector)
 
-      }, //Utils.generateDataType(map)
-        //DataTypes.createStructType(Array(
-        //  DataTypes.createStructField("a", DataTypes.IntegerType, true ),
-        //  DataTypes.createStructField("b", DataTypes.IntegerType, true ),
-        //  DataTypes.createStructField("c", DataTypes.StringType, true ),
-        //  DataTypes.createStructField("matrix", DataTypes.createArrayType(DataTypes.createArrayType(DataTypes.DoubleType)), true)
-        //))
-        dt
-      )
+//      val dataMappingUdf = udf((row: Row) => {
+//        val map = SparkRowUtils.fromRowToMap(row)
+//        dmm.getResultRow(map)
+//        //val a: Any = 1
+//        //Row.apply(a, 21, "aaasa", Seq(Seq(1.0, 2.0), Seq(-1.0, -2.0)))
+//        //mapping.Utils.buildRowFromMapAndDMSelector(map, dmSelector)
+//
+//      }, //Utils.generateDataType(map)
+//        //DataTypes.createStructType(Array(
+//        //  DataTypes.createStructField("a", DataTypes.IntegerType, true ),
+//        //  DataTypes.createStructField("b", DataTypes.IntegerType, true ),
+//        //  DataTypes.createStructField("c", DataTypes.StringType, true ),
+//        //  DataTypes.createStructField("matrix", DataTypes.createArrayType(DataTypes.createArrayType(DataTypes.DoubleType)), true)
+//        //))
+//        dmmSchema
+//      )
 
       /** Create the datasource and get the dataset
         */
@@ -154,7 +195,7 @@ object COPJobDataLinking {
 //          .map(x =>  /* SparkRowUtils.fromRowToMap(x, None)*/)
 
       ds = ds
-        .withColumn("modelOutput", explode(array(dataMappingUdf(struct(in: _*)))))
+        //.withColumn("modelOutput", explode(array(dataMappingUdf(struct(in: _*)))))
 
       ds.printSchema
       ds.show
@@ -177,28 +218,29 @@ object COPJobDataLinking {
 //
 //      SparkListenerShared.setHasSuccessfullyFinished
     } catch {
-      case e: UnsupportedFormatException => SparkListenerShared.setErrorMsg("Unsupported format")
-      case e: UnsupportedDatasourceException => SparkListenerShared.setErrorMsg("Unsupported datasource")
-      case e: IllegalDatasourceConfigurationException => SparkListenerShared.setErrorMsg("Bad datasource configuration")
-      case e: ErrorConnectingToDatasource => SparkListenerShared.setErrorMsg("Error connecting to datasource")
-      case e: PathNotFoundException => SparkListenerShared.setErrorMsg("Path not found")
-      case e: AnalysisException => SparkListenerShared.setErrorMsg(e.getMessage) //Thrown if some column name doesn't exist
-      case e: SparkException => { // These exception are expected to be thrown if they happen inside the COP Model
-        val t = ExceptionUtils.getRootCause(e)
-        t match {
-          case cce: ClassCastException => SparkListenerShared.setErrorMsg(t.getMessage)
-          case cce: ToolBoxError => SparkListenerShared.setErrorMsg(t.getMessage)
-          case _ => {
-            // Check if one of the root causes is InvocationTargetException. That may be caused by an exception thrown
-            // in the COP Model
-            val iteOpt = ExceptionUtils.getThrowableList(e).asScala
-              .filter(x => x.getClass equals classOf[InvocationTargetException]).headOption
-            if(iteOpt.isDefined){
-              SparkListenerShared.setErrorMsg(s"Exception thrown from COPModel: ${t}")
-            }
-          }
-        }
-      }
+     // case e: UnsupportedFormatException => SparkListenerShared.setErrorMsg("Unsupported format")
+     // case e: UnsupportedDatasourceException => SparkListenerShared.setErrorMsg("Unsupported datasource")
+     // case e: IllegalDatasourceConfigurationException => SparkListenerShared.setErrorMsg("Bad datasource configuration")
+     // case e: ErrorConnectingToDatasource => SparkListenerShared.setErrorMsg("Error connecting to datasource")
+     // case e: PathNotFoundException => SparkListenerShared.setErrorMsg("Path not found")
+     // case e: AnalysisException => SparkListenerShared.setErrorMsg(e.getMessage) //Thrown if some column name doesn't exist
+     // case e: SparkException => { // These exception are expected to be thrown if they happen inside the COP Model
+     //   val t = ExceptionUtils.getRootCause(e)
+     //   t match {
+     //     case cce: ClassCastException => SparkListenerShared.setErrorMsg(t.getMessage)
+     //     case cce: ToolBoxError => SparkListenerShared.setErrorMsg(t.getMessage)
+     //     case _ => {
+     //       // Check if one of the root causes is InvocationTargetException. That may be caused by an exception thrown
+     //       // in the COP Model
+     //       val iteOpt = ExceptionUtils.getThrowableList(e).asScala
+     //         .filter(x => x.getClass equals classOf[InvocationTargetException]).headOption
+     //       if(iteOpt.isDefined){
+     //         SparkListenerShared.setErrorMsg(s"Exception thrown from COPModel: ${t}")
+     //       }
+     //     }
+     //   }
+     // }
+      case e: Throwable => e.printStackTrace()
     } finally {
       spark.close()
     }

@@ -19,7 +19,7 @@ class Number(n: Double) {
 
 object Number {
 
-  def createNumber(a: Any) = new Number(a)
+  def createNumber(a: Any) = Try(new Number(a)).toOption
 
   implicit def ordering[A <: Number]: Ordering[A] = Ordering.by(_.getDouble)
 
@@ -33,6 +33,10 @@ object Number {
 
   implicit class NumberTransform(a: Number) {
     def getAs[T](implicit run: Number => Option[T]): Option[T] = run(a)
+  }
+
+  implicit class OptionalNumberTransform(a: Option[Number]) {
+    def getAs[T](implicit run: Number => Option[T]): Option[T] = if(a.isDefined) run(a.get) else None
   }
 
   // Implicits to transform Int, Double, Float and Logs to Number

@@ -9,6 +9,10 @@ import es.us.idea.exceptions.datasource._
 import org.apache.spark.sql.{AnalysisException, Dataset, SparkSession}
 import org.mongodb.scala.MongoException
 
+import scala.tools.nsc.Settings
+import scala.tools.nsc.interpreter._
+import javax.script._
+
 class Datasources(spark: SparkSession, dataset: es.us.idea.dao.Dataset) {
 
   def loadFromMongo(): Dataset[_] = {
@@ -34,20 +38,20 @@ class Datasources(spark: SparkSession, dataset: es.us.idea.dao.Dataset) {
     if (!dataset.format.isDefined) throw new UnsupportedFormatException("Format must be specified")
     val format = dataset.format.get
     if (!List("json", "csv").contains(format)) throw new UnsupportedFormatException("Format not supported")
-    try {
+    //try {
       if (format equals "json")
         //spark.read.json(s"hdfs://${dataset.hostname}:${dataset.port}/${dataset.path}")
         spark.read.json(s"/home/alvaro/datasets/hidrocantabrico_split.json")
         //spark.read.json(s"${dataset.path}/fdsdfs")
       else
         spark.read.csv(s"hdfs://${dataset.hostname}:${dataset.port}/${dataset.path}")
-    } catch {
-      case iae: IllegalArgumentException => throw new IllegalDatasourceConfigurationException("Bad datasource configuration")
-      case ioe: IOException => throw new IllegalDatasourceConfigurationException("Bad datasource configuration")
-      case efe: EOFException => throw new ErrorConnectingToDatasource("Error connecting to datasource")
-      case ae: AnalysisException => throw new PathNotFoundException("Specified path not found")
-      case pnfe: org.apache.hadoop.fs.PathNotFoundException => throw new PathNotFoundException("Specified path not found")
-    }
+    //} catch {
+    //  case iae: IllegalArgumentException => throw new IllegalDatasourceConfigurationException("Bad datasource configuration")
+    //  case ioe: IOException => throw new IllegalDatasourceConfigurationException("Bad datasource configuration")
+    //  case efe: EOFException => throw new ErrorConnectingToDatasource("Error connecting to datasource")
+    //  case ae: AnalysisException => throw new PathNotFoundException("Specified path not found")
+    //  case pnfe: org.apache.hadoop.fs.PathNotFoundException => throw new PathNotFoundException("Specified path not found")
+    //}
 
   }
 
