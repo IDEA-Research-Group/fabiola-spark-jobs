@@ -2,7 +2,7 @@ package es.us.idea.cop.definitions
 
 import es.us.idea.dao._
 
-object COPModels {
+object ModelDefinitions {
 
   val hidrocantabricoDef = COPModel(
     "Hidrocantabrico COP"
