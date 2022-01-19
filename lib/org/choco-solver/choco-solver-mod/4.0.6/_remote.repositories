@@ -1,0 +1,4 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Wed Jan 19 10:48:41 CET 2022
+choco-solver-mod-4.0.6.jar>=
+choco-solver-mod-4.0.6.pom>=
