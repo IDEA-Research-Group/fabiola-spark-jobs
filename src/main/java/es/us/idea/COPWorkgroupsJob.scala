@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException
 
 import com.mongodb.spark.MongoSpark
 import com.mongodb.spark.sql.fieldTypes.ObjectId
-import es.us.idea.cop.definitions.COPModels
+import es.us.idea.cop.definitions.ModelDefinitions
 import es.us.idea.cop._
 import es.us.idea.exceptions.datasource._
 import es.us.idea.listeners.SparkListenerShared
