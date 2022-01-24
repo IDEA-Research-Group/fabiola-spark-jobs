@@ -17,3 +17,5 @@ target/
 
 #Java
 *.class
+
+input/
