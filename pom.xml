@@ -68,12 +68,12 @@
             <version>3.5.3</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryo -->
+        <!-- https://mvnrepository.com/artifact/com.esotericsoftware/kryo
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
             <version>4.0.2</version>
-        </dependency>
+        </dependency>-->
 
 
     </dependencies>
@@ -139,34 +139,14 @@
                     </execution>
                 </executions>
             </plugin>
-
-
-            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.1</version>
+                <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <groupId>org.choco-solver</groupId>
-                    <artifactId>choco-solver-mod</artifactId>
-                    <version>4.0.6</version>
-                    <packaging>jar</packaging>
-                    <file>${project.basedir}/lib/choco-solver-4.0.6.jar</file>
-                    <generatePom>true</generatePom>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>install-jar-lib</id>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <phase>validate</phase>
-                    </execution>
-                </executions>
             </plugin>
-            -->
-
-
         </plugins>
     </build>
 
