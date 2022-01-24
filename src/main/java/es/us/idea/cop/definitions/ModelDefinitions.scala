@@ -212,16 +212,16 @@ object ModelDefinitions {
       |      for (j <- 0 until 3) {
       |        val pm = scale * ( j match {
       |          case 0 => math.max(
-      |            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Int].toInt,
-      |            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Int].toInt
+      |            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Long].toInt,
+      |            consumoActual(i).get("potencia_maxima_p1").get.asInstanceOf[Long].toInt
       |          )
       |          case 1 => math.max(
-      |            consumoActual(i).get("potencia_maxima_p2").get.asInstanceOf[Int].toInt,
-      |            consumoActual(i).get("potencia_maxima_p5").get.asInstanceOf[Int].toInt
+      |            consumoActual(i).get("potencia_maxima_p2").get.asInstanceOf[Long].toInt,
+      |            consumoActual(i).get("potencia_maxima_p5").get.asInstanceOf[Long].toInt
       |          )
       |          case 2 => math.max(
-      |            consumoActual(i).get("potencia_maxima_p3").get.asInstanceOf[Int].toInt,
-      |            consumoActual(i).get("potencia_maxima_p6").get.asInstanceOf[Int].toInt
+      |            consumoActual(i).get("potencia_maxima_p3").get.asInstanceOf[Long].toInt,
+      |            consumoActual(i).get("potencia_maxima_p6").get.asInstanceOf[Long].toInt
       |          )
       |        })
       |
@@ -231,7 +231,7 @@ object ModelDefinitions {
       |          case 2 => precioTarifa.get("p3").get.toInt
       |        }
       |
-      |        val dias = consumoActual(i).get("dias_facturacion").get.asInstanceOf[Int].toInt
+      |        val dias = consumoActual(i).get("dias_facturacion").get.asInstanceOf[Long].toInt
       |
       |        model.ifThen(
       |          model.arithm(model.intScaleView(potenciaContratada(j), 85), ">", pm * 100),
