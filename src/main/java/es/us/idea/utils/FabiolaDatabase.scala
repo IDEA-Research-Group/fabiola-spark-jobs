@@ -5,7 +5,7 @@ import es.us.idea.dao._
 import org.bson.BsonDocument
 import org.mongodb.scala.bson.{BsonDocument, BsonObjectId}
 import org.mongodb.scala.{MongoClient, MongoCollection}
-import org.mongodb.scala.bson.codecs.DEFAULT_CODEC_REGISTRY
+import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.mongodb.scala.bson.codecs.Macros._
 import org.mongodb.scala.bson.collection.immutable.Document

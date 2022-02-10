@@ -25,7 +25,7 @@ object TestDSL extends App {
   df.printSchema()
 
   val copDf = df.cop
-    .string(copModel.model)
+    .path("input/conquense.cop")
     .in("consumos", "precio_potencia")
     .out("TPTotal", "pc1", "pc2", "pc3")
     .execute()

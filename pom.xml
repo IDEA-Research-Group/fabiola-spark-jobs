@@ -12,55 +12,63 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.11.8</version>
+            <version>2.12.8</version>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-reflect</artifactId>
-            <version>2.11.8</version>
+            <version>2.12.8</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.scala-lang/scala-compiler -->
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-compiler</artifactId>
-            <version>2.11.8</version>
+            <version>2.12.8</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_2.11</artifactId>
-            <version>2.2.1</version>
+            <artifactId>spark-core_2.12</artifactId>
+            <version>3.1.2</version>
             <scope>compile</scope>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-sql -->
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql_2.11</artifactId>
-            <version>2.2.1</version>
+            <artifactId>spark-sql_2.12</artifactId>
+            <version>3.1.2</version>
             <scope>compile</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.mongodb.scala/mongo-scala-driver -->
         <dependency>
             <groupId>org.mongodb.scala</groupId>
-            <artifactId>mongo-scala-driver_2.11</artifactId>
-            <version>2.1.0</version>
-            <scope>compile</scope>
+            <artifactId>mongo-scala-driver_2.12</artifactId>
+            <version>4.4.1</version>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.mongodb.spark/mongo-spark-connector -->
         <dependency>
             <groupId>org.mongodb.spark</groupId>
-            <artifactId>mongo-spark-connector_2.11</artifactId>
-            <version>2.2.1</version>
-            <scope>compile</scope>
+            <artifactId>mongo-spark-connector_2.12</artifactId>
+            <version>3.0.1</version>
         </dependency>
-        <!-- Choco solver modified dependency -->
+        <!-- Choco solver modified dependency
         <dependency>
             <groupId>org.choco-solver</groupId>
             <artifactId>choco-solver-mod</artifactId>
             <version>4.0.6</version>
             <scope>compile</scope>
+        </dependency> -->
+        <!-- https://mvnrepository.com/artifact/org.choco-solver/choco-solver -->
+        <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>choco-solver</artifactId>
+            <version>4.10.8</version>
         </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.json4s/json4s-jackson -->
         <dependency>
             <groupId>org.json4s</groupId>
@@ -143,8 +151,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>
