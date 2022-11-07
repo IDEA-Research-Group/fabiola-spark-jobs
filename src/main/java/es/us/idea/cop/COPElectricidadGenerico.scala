@@ -49,7 +49,16 @@ object COPElectricidadGenerico {
       Seq(3500, 8100, 540)
     )*/
 
-    val CONSUMOS = Seq(Seq(1800, 2000, 1700), Seq(2100, 1800, 1700), Seq(1800, 1900, 1800), Seq(1900, 2000, 1900), Seq(2100, 2000, 1900), Seq(2100, 2200, 2100), Seq(2300, 2200, 2200), Seq(1800, 2000, 1800), Seq(1600, 1900, 1800), Seq(1600, 1700, 1800), Seq(1600, 1900, 1700), Seq(1600, 2000, 1700), Seq(1500, 1700, 1900), Seq(1600, 2000, 1500), Seq(1800, 1800, 1800), Seq(2000, 1900, 1700), Seq(2000, 2200, 1900), Seq(2200, 2200, 2100), Seq(2200, 2200, 2200), Seq(2200, 2100, 1900), Seq(1600, 1800, 1700), Seq(2000, 1900, 1700), Seq(1800, 2000, 2100), Seq(1600, 1700, 1600))
+
+    val CONSUMOS = Seq(
+      Seq(1800, 2000, 1700),
+      Seq(2100, 1800, 2100),
+      Seq(1800, 1900, 1800),
+      Seq(1900, 2000, 1900),
+      Seq(2100, 2200, 1400)
+    )
+
+    //val CONSUMOS = Seq(Seq(1800, 2000, 1700), Seq(2100, 1800, 1700), Seq(1800, 1900, 1800), Seq(1900, 2000, 1900), Seq(2100, 2000, 1900), Seq(2100, 2200, 2100), Seq(2300, 2200, 2200), Seq(1800, 2000, 1800), Seq(1600, 1900, 1800), Seq(1600, 1700, 1800), Seq(1600, 1900, 1700), Seq(1600, 2000, 1700), Seq(1500, 1700, 1900), Seq(1600, 2000, 1500), Seq(1800, 1800, 1800), Seq(2000, 1900, 1700), Seq(2000, 2200, 1900), Seq(2200, 2200, 2100), Seq(2200, 2200, 2200), Seq(2200, 2100, 1900), Seq(1600, 1800, 1700), Seq(2000, 1900, 1700), Seq(1800, 2000, 2100), Seq(1600, 1700, 1600))
 
     /** Instanciacion modelo */
     val model = new Model("ElectricityCOP")
@@ -134,7 +143,7 @@ object COPElectricidadGenerico {
       * Solucion
       * ***********************************************************/
     val solver = model.getSolver
-    val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, 50 * 1000000000L))
+    val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE, new TimeCounter(model, 5 * 1000000000L))
     //val solution = solver.findOptimalSolution(TPTotal, Model.MINIMIZE)
 
     val metrics = Seq(solver.getTimeCount.toDouble,solver.getReadingTimeCount.toDouble, (solver.getTimeCount + solver.getReadingTimeCount).toDouble, model.getNbVars.toDouble, model.getNbCstrs.toDouble)
